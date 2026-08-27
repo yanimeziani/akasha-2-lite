@@ -48,6 +48,7 @@
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="euroc_data.js"></script>
 </head>
 <body>
 
@@ -803,20 +804,30 @@
     const btnEuroc = document.getElementById("btn-load-euroc");
     btnEuroc.addEventListener("click", () => {
       if (!isEurocMode) {
-        fetch("euroc_flight.json")
-          .then(res => res.json())
-          .then(data => {
-            eurocData = data;
-            isEurocMode = true;
-            eurocIdx = 0;
-            btnEuroc.textContent = "Switch to Live Hangar Arena";
-            btnEuroc.classList.remove("primary");
-            btnEuroc.classList.add("active");
-            document.querySelector("h1").innerHTML = 'AKASHA-NAV <span class="badge" style="background:#8b5cf6;">REAL ETH ZÜRICH MAV</span>';
-            document.querySelector(".subtitle").textContent = "Real Vicon Laser Ground Truth vs Akasha-Nav (83.5s)";
-            document.getElementById("hud-status").textContent = "ETH VICON LASER DATA";
-          })
-          .catch(() => alert("euroc_flight.json not found."));
+        const data = window.EUROC_FLIGHT_DATA;
+        if (data) {
+          eurocData = data;
+          isEurocMode = true;
+          eurocIdx = 0;
+          btnEuroc.textContent = "Switch to Live Hangar Arena";
+          btnEuroc.classList.remove("primary");
+          btnEuroc.classList.add("active");
+          document.querySelector("h1").innerHTML = 'AKASHA-NAV <span class="badge" style="background:#8b5cf6;">REAL ETH ZÜRICH MAV</span>';
+          document.querySelector(".subtitle").textContent = "Real Vicon Laser Ground Truth vs Akasha-Nav (83.5s Flight)";
+          document.getElementById("hud-status").textContent = "ETH VICON LASER DATA";
+        } else {
+          fetch("euroc_flight.json")
+            .then(res => res.json())
+            .then(d => {
+              eurocData = d;
+              isEurocMode = true;
+              eurocIdx = 0;
+              btnEuroc.textContent = "Switch to Live Hangar Arena";
+              btnEuroc.classList.remove("primary");
+              btnEuroc.classList.add("active");
+            })
+            .catch(err => alert("Could not load flight data: " + err));
+        }
       } else {
         isEurocMode = false;
         btnEuroc.textContent = "Load Real ETH Zürich Flight (V1_02)";
