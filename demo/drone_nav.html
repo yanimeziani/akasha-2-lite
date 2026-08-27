@@ -3,30 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AKASHA-NAV: Autonomous 3D Drone Flight Facility (Full Map Telemetry)</title>
+  <title>AKASHA-NAV: Photorealistic Autonomous Drone Flight Facility</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; user-select: none; }
-    body { background: #020617; color: #f8fafc; overflow: hidden; width: 100vw; height: 100vh; }
+    body { background: #010409; color: #f8fafc; overflow: hidden; width: 100vw; height: 100vh; }
     #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
     
-    /* HUD Overlays */
+    /* Cinematic Glass HUD Overlays */
     .hud { position: absolute; pointer-events: none; z-index: 10; padding: 20px; }
-    .hud-top-left { top: 0; left: 0; max-width: 380px; }
+    .hud-top-left { top: 0; left: 0; max-width: 390px; }
     .hud-top-right { top: 0; right: 0; text-align: right; pointer-events: auto; }
-    .hud-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; pointer-events: auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(14px); padding: 12px 24px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+    .hud-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; pointer-events: auto; background: rgba(10, 15, 29, 0.82); backdrop-filter: blur(16px); padding: 12px 24px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 20px 50px rgba(0,0,0,0.7); }
 
-    /* Radar Mini-Map in Bottom Right */
-    #radar-container { position: absolute; bottom: 20px; right: 20px; width: 180px; height: 180px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; pointer-events: auto; z-index: 10; padding: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    #radar-canvas { width: 100%; height: 100%; background: #030712; border-radius: 8px; }
-    .radar-title { position: absolute; top: 12px; left: 14px; font-size: 0.65rem; color: #38bdf8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* Tactical Mini-Map */
+    #radar-container { position: absolute; bottom: 20px; right: 20px; width: 190px; height: 190px; background: rgba(10, 15, 29, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: 12px; pointer-events: auto; z-index: 10; padding: 8px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); }
+    #radar-canvas { width: 100%; height: 100%; background: #020617; border-radius: 8px; }
+    .radar-title { position: absolute; top: 12px; left: 14px; font-size: 0.65rem; color: #38bdf8; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; }
 
     h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; color: #fff; display: flex; align-items: center; gap: 8px; }
     .badge { background: #0284c7; color: #fff; font-size: 0.68rem; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; font-weight: 800; }
+    .badge-pbr { background: linear-gradient(135deg, #0284c7, #8b5cf6); }
     .badge-live { background: #10b981; animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .subtitle { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
     
-    .stat-box { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px 14px; margin-top: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+    .stat-box { background: rgba(10, 15, 29, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px 14px; margin-top: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
     .stat-label { font-size: 0.68rem; color: #64748b; text-transform: uppercase; display: flex; justify-content: space-between; font-weight: 600; }
     .stat-val { font-size: 1.25rem; font-weight: 800; font-family: monospace; }
 
@@ -43,7 +44,7 @@
     .slider-label { font-size: 0.68rem; color: #94a3b8; display: flex; justify-content: space-between; }
     input[type=range] { width: 100%; accent-color: #38bdf8; cursor: pointer; }
 
-    #phase-canvas { width: 100%; height: 95px; background: #030712; border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; margin-top: 6px; display: block; }
+    #phase-canvas { width: 100%; height: 90px; background: #020617; border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; margin-top: 6px; display: block; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -54,7 +55,7 @@
 
   <!-- Top Left: Flight Telemetry & Hamiltonian Phase Space -->
   <div class="hud hud-top-left">
-    <h1>AKASHA-NAV <span class="badge badge-live">FLIGHT ARENA</span></h1>
+    <h1>AKASHA-NAV <span class="badge badge-pbr">PHOTOREAL PBR</span></h1>
     <div class="subtitle">Autonomous 3D Facility Navigation &amp; Invariant Kinematics</div>
 
     <div class="stat-box">
@@ -80,7 +81,7 @@
         <span>Hamiltonian Phase Space (q_x vs p_x)</span>
         <span id="hud-energy" style="color: #c084fc;">H: 0.0 J</span>
       </div>
-      <canvas id="phase-canvas" width="340" height="95"></canvas>
+      <canvas id="phase-canvas" width="350" height="90"></canvas>
     </div>
   </div>
 
@@ -108,15 +109,16 @@
       <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
         <button id="btn-load-euroc" class="btn primary">Load Real ETH Zürich Flight (V1_02)</button>
         <button id="btn-toggle-filter" class="btn active">Akasha Filter: ENABLED</button>
+        <button id="btn-lighting" class="btn">Lighting: High-Contrast Studio</button>
         <button id="btn-reset-flight" class="btn">Reset Flight to Origin</button>
       </div>
     </div>
   </div>
 
-  <!-- Radar Mini-Map (Bottom Right) -->
+  <!-- Tactical Radar Mini-Map -->
   <div id="radar-container">
     <div class="radar-title">Facility Radar</div>
-    <canvas id="radar-canvas" width="164" height="164"></canvas>
+    <canvas id="radar-canvas" width="174" height="174"></canvas>
   </div>
 
   <!-- Bottom Playback & Camera Controls -->
@@ -129,7 +131,75 @@
 
   <script>
     // =========================================================================
-    // 1. LIVE AKASHA HAMILTONIAN SYMPLECTIC LEAPFROG OBSERVER
+    // 1. PROCEDURAL PBR TEXTURES (Zero external image dependencies)
+    // =========================================================================
+    function createPolishedConcreteTexture() {
+      const cvs = document.createElement("canvas");
+      cvs.width = 1024; cvs.height = 1024;
+      const ctx = cvs.getContext("2d");
+
+      // Base concrete gradient
+      const grad = ctx.createLinearGradient(0, 0, 1024, 1024);
+      grad.addColorStop(0, "#0c1322");
+      grad.addColorStop(1, "#070a12");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1024, 1024);
+
+      // Micro noise flecks
+      const imgData = ctx.getImageData(0, 0, 1024, 1024);
+      const data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const n = (Math.random() - 0.5) * 16;
+        data[i] = Math.min(255, Math.max(0, data[i] + n));
+        data[i+1] = Math.min(255, Math.max(0, data[i+1] + n));
+        data[i+2] = Math.min(255, Math.max(0, data[i+2] + n + 4));
+      }
+      ctx.putImageData(imgData, 0, 0);
+
+      // Concrete tile seams
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+      ctx.lineWidth = 2;
+      for (let x = 0; x <= 1024; x += 128) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 1024); ctx.stroke();
+      }
+      for (let y = 0; y <= 1024; y += 128) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1024, y); ctx.stroke();
+      }
+
+      // Yellow industrial hazard perimeter line
+      ctx.strokeStyle = "rgba(234, 179, 8, 0.75)";
+      ctx.lineWidth = 12;
+      ctx.strokeRect(30, 30, 964, 964);
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 4);
+      return tex;
+    }
+
+    function createEpoxyRoughnessMap() {
+      const cvs = document.createElement("canvas");
+      cvs.width = 512; cvs.height = 512;
+      const ctx = cvs.getContext("2d");
+      ctx.fillStyle = "#333333"; // Semi-reflective base
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Random micro scuffs and tire roll tracks
+      ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+      for (let i = 0; i < 40; i++) {
+        ctx.fillRect(Math.random() * 512, Math.random() * 512, Math.random() * 120 + 20, Math.random() * 4 + 1);
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 4);
+      return tex;
+    }
+
+    // =========================================================================
+    // 2. LIVE AKASHA HAMILTONIAN SYMPLECTIC LEAPFROG OBSERVER
     // =========================================================================
     class FacilityFlightEngine {
       constructor() {
@@ -183,7 +253,7 @@
         this.q_truth = [gx, gy, gz];
         this.v_truth = [vx, vy, vz];
 
-        // Add Realistic Sensor Noise + Linear Accelerometer Bias Drift
+        // Sensor noise & bias drift
         const randN = () => (Math.random() + Math.random() + Math.random() - 1.5) * 2.0 * this.noiseStd;
         const currentBias = this.biasDrift * Math.min(t / 40.0, 2.0);
 
@@ -193,17 +263,17 @@
           az + randN() + currentBias * 0.6
         ];
 
-        // Filter 1: Naive Double-Integrator (Unconstrained quadratic divergence)
+        // 1. Naive Double-Integrator
         for (let k = 0; k < 3; k++) {
           this.v_naive[k] += rawAcc[k] * this.dt;
           this.q_naive[k] += this.v_naive[k] * this.dt;
         }
 
-        // Filter 2: Akasha-Nav 2nd-Order Symplectic Leapfrog
+        // 2. Akasha-Nav 2nd-Order Symplectic Leapfrog
         if (this.filterEnabled) {
           const F = [this.mass * rawAcc[0], this.mass * rawAcc[1], this.mass * rawAcc[2]];
 
-          // Half-step momentum kick
+          // Step 1: Half-step momentum kick
           const p_half = [
             this.p_akasha[0] + 0.5 * this.dt * F[0],
             this.p_akasha[1] + 0.5 * this.dt * F[1],
@@ -217,7 +287,7 @@
             p_half[0] *= s; p_half[1] *= s; p_half[2] *= s;
           }
 
-          // Full-step position drift
+          // Step 2: Full-step position drift
           const v_half = [p_half[0]/this.mass, p_half[1]/this.mass, p_half[2]/this.mass];
           const q_next = [
             this.q_akasha[0] + this.dt * v_half[0],
@@ -225,7 +295,7 @@
             this.q_akasha[2] + this.dt * v_half[2]
           ];
 
-          // Virtual Corridor Damping + second half-step kick
+          // Step 3: Damping + second half-step kick
           const F_d = [F[0] - 0.14 * v_half[0], F[1] - 0.14 * v_half[1], F[2] - 0.14 * v_half[2]];
           const p_next = [
             p_half[0] + 0.5 * this.dt * F_d[0],
@@ -242,7 +312,6 @@
           this.q_akasha = q_next;
           this.p_akasha = p_next;
         } else {
-          // If disabled, drifts unconstrained
           for (let k = 0; k < 3; k++) {
             const v = this.p_akasha[k] / this.mass + rawAcc[k] * this.dt;
             this.q_akasha[k] += v * this.dt;
@@ -252,7 +321,6 @@
 
         this.simTime += this.dt;
 
-        // Record history
         this.phaseHistory.push({ q: this.q_akasha[0], p: this.p_akasha[0] });
         if (this.phaseHistory.length > 250) this.phaseHistory.shift();
 
@@ -271,15 +339,15 @@
     const engine = new FacilityFlightEngine();
 
     // =========================================================================
-    // 2. HIGH-DETAIL THREE.JS FLIGHT ARENA MAP
+    // 3. PHOTOREALISTIC THREE.JS PBR SCENE SETUP
     // =========================================================================
     const container = document.getElementById("canvas-container");
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x020617);
-    scene.fog = new THREE.FogExp2(0x020617, 0.010);
+    scene.background = new THREE.Color(0x010409);
+    scene.fog = new THREE.FogExp2(0x010409, 0.009);
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(-25, 28, 45);
+    const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(-26, 26, 42);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -287,7 +355,8 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.3;
+    renderer.toneMappingExposure = 1.35;
+    renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -295,119 +364,180 @@
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2 - 0.02;
 
-    // Lighting
-    scene.add(new THREE.AmbientLight(0x1e293b, 1.8));
+    // --- PROCEDURAL IBL ENVIRONMENT CUBEMAP GENERATOR ---
+    const pmremGen = new THREE.PMREMGenerator(renderer);
+    pmremGen.compileEquirectangularShader();
 
-    const mainSpot = new THREE.DirectionalLight(0xffffff, 2.0);
-    mainSpot.position.set(20, 50, 20);
-    mainSpot.castShadow = true;
-    mainSpot.shadow.mapSize.width = 2048;
-    mainSpot.shadow.mapSize.height = 2048;
-    mainSpot.shadow.bias = -0.0003;
-    scene.add(mainSpot);
+    const envScene = new THREE.Scene();
+    const envBox = new THREE.Mesh(
+      new THREE.BoxGeometry(100, 100, 100),
+      new THREE.MeshBasicMaterial({ color: 0x050914, side: THREE.BackSide })
+    );
+    envScene.add(envBox);
 
-    const cyanBayLight = new THREE.PointLight(0x38bdf8, 3.5, 90);
-    cyanBayLight.position.set(-25, 12, -25);
-    scene.add(cyanBayLight);
+    // Overhead high-intensity studio strip lights in environment
+    for (let i = -2; i <= 2; i++) {
+      const strip = new THREE.Mesh(
+        new THREE.PlaneGeometry(60, 2),
+        new THREE.MeshBasicMaterial({ color: 0xffffff })
+      );
+      strip.position.set(0, 48, i * 16);
+      strip.rotation.x = Math.PI / 2;
+      envScene.add(strip);
+    }
+    const envRenderTarget = pmremGen.fromScene(envScene);
+    scene.environment = envRenderTarget.texture;
 
-    const purpleBayLight = new THREE.PointLight(0xa855f7, 2.5, 90);
-    purpleBayLight.position.set(25, 12, 25);
-    scene.add(purpleBayLight);
+    // --- CINEMATIC MULTI-TIER PBR LIGHTING RIG ---
+    // 1. Ambient Fill
+    const ambientLight = new THREE.AmbientLight(0x0a1124, 1.6);
+    scene.add(ambientLight);
 
-    // --- MAP GEOMETRY: INDUSTRIAL HANGAR FACILITY ---
+    // 2. High-Angle Primary Sun / Hangar Key Light (with 4K soft shadows)
+    const keyLight = new THREE.DirectionalLight(0xfff7ed, 2.6);
+    keyLight.position.set(25, 55, 20);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 4096;
+    keyLight.shadow.mapSize.height = 4096;
+    keyLight.shadow.camera.near = 10;
+    keyLight.shadow.camera.far = 140;
+    keyLight.shadow.camera.left = -45;
+    keyLight.shadow.camera.right = 45;
+    keyLight.shadow.camera.top = 45;
+    keyLight.shadow.camera.bottom = -45;
+    keyLight.shadow.bias = -0.0002;
+    keyLight.shadow.radius = 2.5;
+    scene.add(keyLight);
+
+    // 3. Cool Cyan Rim / Fill Light
+    const fillLight = new THREE.DirectionalLight(0x38bdf8, 1.4);
+    fillLight.position.set(-30, 30, -30);
+    scene.add(fillLight);
+
+    // 4. Warm Ground Accent Lights
+    const warmLight = new THREE.PointLight(0xf59e0b, 2.5, 60);
+    warmLight.position.set(20, 4, -20);
+    scene.add(warmLight);
+
+    // --- ARENA ARCHITECTURE & PHOTOREAL PBR MATERIALS ---
     const arenaSize = 80;
-    
-    // 1. Concrete Polished Floor with Safety Stripes
+
+    // 1. Polished Epoxy Concrete Floor with Clearcoat Specular Sheen
     const floorGeo = new THREE.PlaneGeometry(arenaSize, arenaSize);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x0b0f19, roughness: 0.35, metalness: 0.5 });
+    const floorTexture = createPolishedConcreteTexture();
+    const roughnessTexture = createEpoxyRoughnessMap();
+
+    const floorMat = new THREE.MeshPhysicalMaterial({
+      map: floorTexture,
+      roughnessMap: roughnessTexture,
+      roughness: 0.22,
+      metalness: 0.15,
+      clearcoat: 0.7,
+      clearcoatRoughness: 0.12,
+      reflectivity: 0.85,
+    });
     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
     floorMesh.rotation.x = -Math.PI / 2;
     floorMesh.receiveShadow = true;
     scene.add(floorMesh);
 
-    // Floor Grid Overlay
-    const gridHelper = new THREE.GridHelper(arenaSize, 40, 0x38bdf8, 0x1e293b);
-    gridHelper.position.y = 0.02;
-    scene.add(gridHelper);
+    // Fine grid overlay
+    const fineGrid = new THREE.GridHelper(arenaSize, 80, 0x38bdf8, 0x111c38);
+    fineGrid.position.y = 0.01;
+    scene.add(fineGrid);
 
-    // Helipad / Central Takeoff Zone
-    const padGeo = new THREE.RingGeometry(3.5, 4.0, 32);
-    const padMat = new THREE.MeshBasicMaterial({ color: 0x4ade80, side: THREE.DoubleSide });
-    const padMesh = new THREE.Mesh(padGeo, padMat);
-    padMesh.rotation.x = -Math.PI / 2;
-    padMesh.position.y = 0.04;
-    scene.add(padMesh);
+    // Central Precision Helipad (H) with Glowing Inset LEDs
+    const helipadMesh = new THREE.Mesh(
+      new THREE.RingGeometry(3.6, 4.2, 48),
+      new THREE.MeshBasicMaterial({ color: 0x4ade80, side: THREE.DoubleSide })
+    );
+    helipadMesh.rotation.x = -Math.PI / 2;
+    helipadMesh.position.y = 0.03;
+    scene.add(helipadMesh);
 
-    // Inner Helipad H marking
-    const hBar1 = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 3.2), new THREE.MeshBasicMaterial({ color: 0x4ade80 }));
-    hBar1.rotation.x = -Math.PI / 2; hBar1.position.set(-0.8, 0.05, 0); scene.add(hBar1);
-    const hBar2 = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 3.2), new THREE.MeshBasicMaterial({ color: 0x4ade80 }));
-    hBar2.rotation.x = -Math.PI / 2; hBar2.position.set(0.8, 0.05, 0); scene.add(hBar2);
-    const hCross = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.5), new THREE.MeshBasicMaterial({ color: 0x4ade80 }));
-    hCross.rotation.x = -Math.PI / 2; hCross.position.set(0, 0.05, 0); scene.add(hCross);
+    // 2. Perimeter Structural Walls with Architectural Dark Metal Ribs
+    const wallHeight = 18;
+    const wallMat = new THREE.MeshStandardMaterial({
+      color: 0x080e1a,
+      roughness: 0.6,
+      metalness: 0.45,
+    });
 
-    // 2. Perimeter Concrete Walls with Warning Stripes
-    const wallHeight = 16;
-    const wallMat = new THREE.MeshStandardMaterial({ color: 0x090d16, roughness: 0.7, metalness: 0.2 });
-    
-    function createWall(x, z, rotY) {
-      const w = new THREE.Mesh(new THREE.BoxGeometry(arenaSize, wallHeight, 1.2), wallMat);
+    function buildWall(x, z, rotY) {
+      const w = new THREE.Mesh(new THREE.BoxGeometry(arenaSize, wallHeight, 1.4), wallMat);
       w.position.set(x, wallHeight / 2, z);
       w.rotation.y = rotY;
       w.receiveShadow = true;
       scene.add(w);
 
-      // Warning hazard stripe band
-      const stripeGeo = new THREE.BoxGeometry(arenaSize, 0.6, 1.25);
-      const stripeMat = new THREE.MeshBasicMaterial({ color: 0xeab308 });
-      const stripe = new THREE.Mesh(stripeGeo, stripeMat);
-      stripe.position.set(x, 1.2, z);
-      stripe.rotation.y = rotY;
-      scene.add(stripe);
+      // Upper glowing industrial LED ribbon
+      const ribbon = new THREE.Mesh(
+        new THREE.BoxGeometry(arenaSize, 0.25, 1.5),
+        new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+      );
+      ribbon.position.set(x, wallHeight - 1.2, z);
+      ribbon.rotation.y = rotY;
+      scene.add(ribbon);
     }
-    createWall(0, -arenaSize / 2, 0);
-    createWall(0, arenaSize / 2, 0);
-    createWall(-arenaSize / 2, 0, Math.PI / 2);
-    createWall(arenaSize / 2, 0, Math.PI / 2);
+    buildWall(0, -arenaSize / 2, 0);
+    buildWall(0, arenaSize / 2, 0);
+    buildWall(-arenaSize / 2, 0, Math.PI / 2);
+    buildWall(arenaSize / 2, 0, Math.PI / 2);
 
-    // 3. Structural Industrial Pillars & Laser Masts
-    const pillarGeo = new THREE.CylinderGeometry(0.8, 0.9, wallHeight, 16);
-    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.3 });
-    const pillarPositions = [
-      [-24, -24], [24, -24], [-24, 24], [24, 24],
-      [-24, 0], [24, 0], [0, -24], [0, 24]
-    ];
-    pillarPositions.forEach(p => {
-      const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-      pillar.position.set(p[0], wallHeight / 2, p[1]);
-      pillar.castShadow = true;
-      pillar.receiveShadow = true;
-      scene.add(pillar);
+    // 3. Structural Heavy Duty Carbon Columns with Warning Lights
+    const columnGeo = new THREE.CylinderGeometry(0.85, 0.95, wallHeight, 24);
+    const columnMat = new THREE.MeshStandardMaterial({
+      color: 0x111827,
+      roughness: 0.25,
+      metalness: 0.85,
+    });
+    const colCoords = [[-24, -24], [24, -24], [-24, 24], [24, 24], [-24, 0], [24, 0], [0, -24], [0, 24]];
+    colCoords.forEach(c => {
+      const col = new THREE.Mesh(columnGeo, columnMat);
+      col.position.set(c[0], wallHeight / 2, c[1]);
+      col.castShadow = true;
+      col.receiveShadow = true;
+      scene.add(col);
 
-      // Top beacon light
-      const beacon = new THREE.PointLight(0xef4444, 0.8, 15);
-      beacon.position.set(p[0], wallHeight, p[1]);
+      // Warning Strobe Beacon on top
+      const beacon = new THREE.PointLight(0xef4444, 1.2, 18);
+      beacon.position.set(c[0], wallHeight + 0.2, c[1]);
       scene.add(beacon);
     });
 
-    // 4. Warehouse Storage Container Stacks along perimeter
-    const boxGeo = new THREE.BoxGeometry(4.5, 2.6, 2.4);
-    const boxColors = [0x1e293b, 0x0284c7, 0x334155, 0x0f172a];
-    for (let i = 0; i < 12; i++) {
-      const bMat = new THREE.MeshStandardMaterial({ color: boxColors[i % boxColors.length], roughness: 0.4, metalness: 0.5 });
-      const b = new THREE.Mesh(boxGeo, bMat);
-      const angle = (i / 12) * Math.PI * 2;
-      const r = arenaSize / 2 - 4.5;
-      b.position.set(Math.cos(angle) * r, 1.3, Math.sin(angle) * r);
-      b.rotation.y = angle + Math.PI / 4;
-      b.castShadow = true;
-      scene.add(b);
+    // 4. Perimeter High-Bay Overhead Lighting Gantry Trusses
+    const trussMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.9, roughness: 0.2 });
+    for (let z = -24; z <= 24; z += 24) {
+      const truss = new THREE.Mesh(new THREE.BoxGeometry(arenaSize, 0.8, 0.8), trussMat);
+      truss.position.set(0, wallHeight - 2.0, z);
+      scene.add(truss);
+
+      // Fluorescent downlights along truss
+      for (let x = -28; x <= 28; x += 14) {
+        const fixture = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.2, 0.4), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        fixture.position.set(x, wallHeight - 2.4, z);
+        scene.add(fixture);
+
+        const downlight = new THREE.SpotLight(0xffffff, 2.2, 28, Math.PI / 5, 0.6, 1.2);
+        downlight.position.set(x, wallHeight - 2.5, z);
+        downlight.target.position.set(x, 0, z);
+        scene.add(downlight);
+        scene.add(downlight.target);
+      }
     }
 
-    // 5. 3D Flight Corridor Waypoint Gates
+    // 5. 3D Flight Corridor Waypoint Torus Rings
     const gatesGroup = new THREE.Group();
-    const gateGeo = new THREE.TorusGeometry(3.2, 0.12, 16, 32);
-    const gateMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.45 });
+    const gateGeo = new THREE.TorusGeometry(3.4, 0.12, 16, 48);
+    const gateMat = new THREE.MeshPhysicalMaterial({
+      color: 0x38bdf8,
+      emissive: 0x38bdf8,
+      emissiveIntensity: 0.65,
+      roughness: 0.1,
+      metalness: 0.9,
+      transparent: true,
+      opacity: 0.75,
+    });
     for (let i = 0; i < 6; i++) {
       const g = new THREE.Mesh(gateGeo, gateMat);
       const angle = (i / 6) * Math.PI * 2;
@@ -417,62 +547,89 @@
     }
     scene.add(gatesGroup);
 
-    // --- HIGH-DETAIL DRONE 3D MODEL ---
+    // --- PHOTOREALISTIC DRONE QUADCOPTER MODEL ---
     const droneGroup = new THREE.Group();
 
-    // Central Carbon Body Pod
-    const bodyPod = new THREE.Mesh(
-      new THREE.BoxGeometry(1.6, 0.4, 1.6),
-      new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.2 })
-    );
+    // Central Monocoque Fuselage (Matte Carbon Fiber Composite)
+    const bodyMat = new THREE.MeshPhysicalMaterial({
+      color: 0x090d16,
+      roughness: 0.2,
+      metalness: 0.85,
+      clearcoat: 0.6,
+      clearcoatRoughness: 0.15,
+    });
+    const bodyPod = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.35, 1.6), bodyMat);
     bodyPod.castShadow = true;
     droneGroup.add(bodyPod);
 
-    // Front Optical Gimbal Eye
-    const camLens = new THREE.Mesh(
-      new THREE.SphereGeometry(0.3, 16, 16),
-      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
-    );
-    camLens.position.set(0, -0.15, 0.85);
-    droneGroup.add(camLens);
+    // Glass Optical Gimbal Camera Dome
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      transmission: 0.92,
+      roughness: 0.05,
+      ior: 1.5,
+      thickness: 0.8,
+      transparent: true,
+      opacity: 1.0,
+    });
+    const camDome = new THREE.Mesh(new THREE.SphereGeometry(0.32, 24, 24), glassMat);
+    camDome.position.set(0, -0.12, 0.85);
+    droneGroup.add(camDome);
 
-    // Carbon Tube Arms
-    const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 2.6);
+    const innerLens = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+    innerLens.position.set(0, -0.12, 0.85);
+    droneGroup.add(innerLens);
+
+    // Carbon Fiber Arms with Motor Housings
+    const armMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.9, roughness: 0.15 });
+    const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 2.7);
     armGeo.rotateZ(Math.PI / 2);
-    const armMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9, roughness: 0.1 });
-    
-    const arm1 = new THREE.Mesh(armGeo, armMat); arm1.rotation.y = Math.PI / 4; droneGroup.add(arm1);
-    const arm2 = new THREE.Mesh(armGeo, armMat); arm2.rotation.y = -Math.PI / 4; droneGroup.add(arm2);
 
-    // Motors & Translucent Prop Discs
-    const motorGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.25, 16);
-    const motorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9 });
-    const propGeo = new THREE.CylinderGeometry(0.65, 0.65, 0.02, 16);
-    const propMat = new THREE.MeshBasicMaterial({ color: 0x4ade80, transparent: true, opacity: 0.65 });
-    
+    const a1 = new THREE.Mesh(armGeo, armMat); a1.rotation.y = Math.PI / 4; a1.castShadow = true; droneGroup.add(a1);
+    const a2 = new THREE.Mesh(armGeo, armMat); a2.rotation.y = -Math.PI / 4; a2.castShadow = true; droneGroup.add(a2);
+
+    // Motors & Translucent Aerodynamic Rotors
+    const motorMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.95, roughness: 0.1 });
+    const propMat = new THREE.MeshPhysicalMaterial({
+      color: 0x4ade80,
+      transmission: 0.7,
+      roughness: 0.15,
+      transparent: true,
+      opacity: 0.7,
+    });
+
     const rotors = [];
-    const motorOffsets = [[0.9, 0.15, 0.9], [-0.9, 0.15, 0.9], [0.9, 0.15, -0.9], [-0.9, 0.15, -0.9]];
+    const motorOffsets = [[0.95, 0.14, 0.95], [-0.95, 0.14, 0.95], [0.95, 0.14, -0.95], [-0.95, 0.14, -0.95]];
     motorOffsets.forEach(pos => {
-      const m = new THREE.Mesh(motorGeo, motorMat);
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.28, 24), motorMat);
       m.position.set(...pos);
+      m.castShadow = true;
       droneGroup.add(m);
 
-      const p = new THREE.Mesh(propGeo, propMat);
-      p.position.set(pos[0], pos[1] + 0.15, pos[2]);
+      const p = new THREE.Mesh(new THREE.CylinderGeometry(0.72, 0.72, 0.02, 24), propMat);
+      p.position.set(pos[0], pos[1] + 0.16, pos[2]);
       droneGroup.add(p);
       rotors.push(p);
     });
 
-    // Drone Downward Flight Spotlight
-    const droneSpot = new THREE.SpotLight(0x38bdf8, 3.5, 25, Math.PI / 4, 0.5, 1);
+    // FAA Navigation LEDs (Red Port, Green Starboard, White Tail Strobe)
+    const portLED = new THREE.PointLight(0xef4444, 2.5, 6);
+    portLED.position.set(-0.95, 0.0, 0); droneGroup.add(portLED);
+
+    const stbdLED = new THREE.PointLight(0x4ade80, 2.5, 6);
+    stbdLED.position.set(0.95, 0.0, 0); droneGroup.add(stbdLED);
+
+    // Active Downward Flight Searchlight (Illuminates floor with volumetric cone)
+    const droneSpot = new THREE.SpotLight(0x38bdf8, 4.5, 30, Math.PI / 4, 0.4, 1.2);
     droneSpot.position.set(0, -0.2, 0);
-    droneSpot.target.position.set(0, -10, 0);
+    droneSpot.castShadow = true;
+    droneSpot.target.position.set(0, -15, 0);
     droneGroup.add(droneSpot);
     droneGroup.add(droneSpot.target);
 
     scene.add(droneGroup);
 
-    // --- Dynamic 3D Path Geometries ---
+    // --- Dynamic 3D Path Trails ---
     const MAX_POINTS = 900;
     const gtGeo = new THREE.BufferGeometry();
     const naiveGeo = new THREE.BufferGeometry();
@@ -488,7 +645,7 @@
 
     const lineGT = new THREE.Line(gtGeo, new THREE.LineDashedMaterial({ color: 0x4ade80, dashSize: 1.2, gapSize: 0.6 }));
     const lineNaive = new THREE.Line(naiveGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2, transparent: true, opacity: 0.85 }));
-    const lineAkasha = new THREE.Line(akGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 3 }));
+    const lineAkasha = new THREE.Line(akGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 3.5 }));
 
     scene.add(lineGT);
     scene.add(lineNaive);
@@ -497,7 +654,7 @@
     function updateLineBuffers(geo, posArr, path) {
       for (let i = 0; i < path.length; i++) {
         posArr[i * 3 + 0] = path[i][0];
-        posArr[i * 3 + 1] = path[i][1]; // Y is height
+        posArr[i * 3 + 1] = path[i][1];
         posArr[i * 3 + 2] = path[i][2];
       }
       geo.attributes.position.needsUpdate = true;
@@ -505,37 +662,31 @@
     }
 
     // =========================================================================
-    // 3. RADAR MINI-MAP (2D TOP-DOWN FACILITY CANVAS)
+    // 4. RADAR MINI-MAP & PHASE OSCILLOSCOPE
     // =========================================================================
     const radarCanvas = document.getElementById("radar-canvas");
     const rctx = radarCanvas.getContext("2d");
 
     function renderRadarMap() {
-      rctx.fillStyle = "#030712";
+      rctx.fillStyle = "#020617";
       rctx.fillRect(0, 0, radarCanvas.width, radarCanvas.height);
 
       const cx = radarCanvas.width / 2;
       const cy = radarCanvas.height / 2;
-      const scale = 1.85; // 80m arena -> 164px
+      const scale = 1.95;
 
-      // Arena boundary
       rctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
       rctx.lineWidth = 1;
       rctx.strokeRect(cx - (arenaSize/2)*scale, cy - (arenaSize/2)*scale, arenaSize*scale, arenaSize*scale);
 
-      // Radar sweep rings
-      rctx.strokeStyle = "rgba(56, 189, 248, 0.15)";
       [15, 30].forEach(r => {
-        rctx.beginPath();
-        rctx.arc(cx, cy, r * scale, 0, Math.PI * 2);
-        rctx.stroke();
+        rctx.beginPath(); rctx.arc(cx, cy, r * scale, 0, Math.PI * 2); rctx.stroke();
       });
 
-      // Draw trails on radar
-      function drawRadarTrail(path, color) {
+      function drawTrail(path, color) {
         if (path.length < 2) return;
         rctx.strokeStyle = color;
-        rctx.lineWidth = 1.2;
+        rctx.lineWidth = 1.4;
         rctx.beginPath();
         for (let i = 0; i < path.length; i += 3) {
           const rx = cx + path[i][0] * scale;
@@ -545,27 +696,21 @@
         rctx.stroke();
       }
 
-      drawRadarTrail(engine.pathGT, "rgba(74, 222, 128, 0.6)");
-      drawRadarTrail(engine.pathNaive, "rgba(239, 68, 68, 0.7)");
-      drawRadarTrail(engine.pathAkasha, "rgba(56, 189, 248, 0.9)");
+      drawTrail(engine.pathGT, "rgba(74, 222, 128, 0.65)");
+      drawTrail(engine.pathNaive, "rgba(239, 68, 68, 0.75)");
+      drawTrail(engine.pathAkasha, "rgba(56, 189, 248, 0.95)");
 
-      // Draw Drone icon
       const dx = cx + engine.q_akasha[0] * scale;
       const dy = cy + engine.q_akasha[2] * scale;
       rctx.fillStyle = "#38bdf8";
-      rctx.beginPath();
-      rctx.arc(dx, dy, 3.5, 0, Math.PI * 2);
-      rctx.fill();
+      rctx.beginPath(); rctx.arc(dx, dy, 3.5, 0, Math.PI * 2); rctx.fill();
     }
 
-    // =========================================================================
-    // 4. PHASE PORTRAIT CANVAS
-    // =========================================================================
     const phaseCvs = document.getElementById("phase-canvas");
     const pctx = phaseCvs.getContext("2d");
 
     function renderPhasePortrait() {
-      pctx.fillStyle = "#030712";
+      pctx.fillStyle = "#020617";
       pctx.fillRect(0, 0, phaseCvs.width, phaseCvs.height);
 
       pctx.strokeStyle = "#1e293b";
@@ -596,7 +741,7 @@
     }
 
     // =========================================================================
-    // 5. INTERACTIVE CONTROLS & REAL ETH ZÜRICH DATA LOADER
+    // 5. INTERACTION & REAL DATA CONTROLS
     // =========================================================================
     let isSimRunning = true;
     let simSpeed = 1.0;
@@ -624,6 +769,11 @@
     document.getElementById("btn-gates").addEventListener("click", (e) => {
       gatesGroup.visible = !gatesGroup.visible;
       e.target.textContent = gatesGroup.visible ? "Waypoints: Visible" : "Waypoints: Hidden";
+    });
+
+    document.getElementById("btn-lighting").addEventListener("click", (e) => {
+      keyLight.intensity = keyLight.intensity === 2.6 ? 3.8 : 2.6;
+      e.target.textContent = keyLight.intensity === 3.8 ? "Lighting: Maximum Specular" : "Lighting: High-Contrast Studio";
     });
 
     document.getElementById("btn-reset-flight").addEventListener("click", () => {
@@ -672,21 +822,29 @@
         btnEuroc.textContent = "Load Real ETH Zürich Flight (V1_02)";
         btnEuroc.classList.add("primary");
         btnEuroc.classList.remove("active");
-        document.querySelector("h1").innerHTML = 'AKASHA-NAV <span class="badge badge-live">FLIGHT ARENA</span>';
+        document.querySelector("h1").innerHTML = 'AKASHA-NAV <span class="badge badge-pbr">PHOTOREAL PBR</span>';
         document.querySelector(".subtitle").textContent = "Autonomous 3D Facility Navigation & Invariant Kinematics";
         engine.reset();
       }
     });
 
     // =========================================================================
-    // 6. MAIN 60 FPS SIMULATION & RENDER LOOP
+    // 6. MAIN 60 FPS ANIMATION LOOP
     // =========================================================================
+    const clock = new THREE.Clock();
+
     function animate() {
       requestAnimationFrame(animate);
+      const elapsedTime = clock.getElapsedTime();
       controls.update();
 
-      // Spin rotors
-      rotors.forEach(r => r.rotation.y += 0.5);
+      // Spin rotors smoothly
+      rotors.forEach(r => r.rotation.y += 0.55);
+
+      // Flashing FAA Strobe Timer
+      const isStrobe = Math.floor(elapsedTime * 3) % 2 === 0;
+      portLED.intensity = isStrobe ? 3.0 : 0.8;
+      stbdLED.intensity = isStrobe ? 3.0 : 0.8;
 
       if (isSimRunning) {
         if (isEurocMode && eurocData) {
