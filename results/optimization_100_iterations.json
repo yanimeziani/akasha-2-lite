@@ -1,0 +1,1819 @@
+{
+  "best_params": {
+    "damping": 0.45,
+    "energy_scale": 1.142839692476828,
+    "sub_steps": 2,
+    "pre_filter": 0.5045844939971762
+  },
+  "best_metrics": {
+    "mean_ate": 3.842548518104182,
+    "end_drift": 10.352665713017029,
+    "max_drift": 10.352665713017029,
+    "baseline_mean_ate": 14.233117566198139,
+    "baseline_end_drift": 51.54771138180376,
+    "mean_improvement_pct": 73.00276274517853,
+    "end_improvement_pct": 79.91634267458187
+  },
+  "history": [
+    {
+      "iteration": 1,
+      "params": {
+        "damping": 0.18,
+        "energy_scale": 1.0,
+        "sub_steps": 1,
+        "pre_filter": 0.15
+      },
+      "score": 12.162767949402081,
+      "mean_ate": 6.598207681721871,
+      "end_drift": 20.509608350922395,
+      "best_score": 12.162767949402081,
+      "best_mean_ate": 6.598207681721871,
+      "best_end_drift": 20.509608350922395,
+      "rel_improvement": 53.64186622478421,
+      "rel_end_suppression": 60.21237839443199,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 2,
+      "params": {
+        "damping": 0.21648271012732895,
+        "energy_scale": 1.0029836935563619,
+        "sub_steps": 1,
+        "pre_filter": 0.1067449393103376
+      },
+      "score": 10.847003033257838,
+      "mean_ate": 5.971078723972935,
+      "end_drift": 18.160889497185195,
+      "best_score": 10.847003033257838,
+      "best_mean_ate": 5.971078723972935,
+      "best_end_drift": 18.160889497185195,
+      "rel_improvement": 58.0479912696464,
+      "rel_end_suppression": 64.76877632321819,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 3,
+      "params": {
+        "damping": 0.22938831054132325,
+        "energy_scale": 1.1589625574260827,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 10.45550573909095,
+      "mean_ate": 5.786805300407934,
+      "end_drift": 17.458556397115476,
+      "best_score": 10.45550573909095,
+      "best_mean_ate": 5.786805300407934,
+      "best_end_drift": 17.458556397115476,
+      "rel_improvement": 59.34267195156971,
+      "rel_end_suppression": 66.13126765647579,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 4,
+      "params": {
+        "damping": 0.26248656285949223,
+        "energy_scale": 1.2047631895262991,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 9.555769284617885,
+      "mean_ate": 5.354271845828009,
+      "end_drift": 15.8580154428027,
+      "best_score": 9.555769284617885,
+      "best_mean_ate": 5.354271845828009,
+      "best_end_drift": 15.8580154428027,
+      "rel_improvement": 62.38159474953168,
+      "rel_end_suppression": 69.23623761810586,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 5,
+      "params": {
+        "damping": 0.2226577798518857,
+        "energy_scale": 1.1039934480745541,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 10.660384566397477,
+      "mean_ate": 5.885163073758611,
+      "end_drift": 17.823216805355774,
+      "best_score": 9.555769284617885,
+      "best_mean_ate": 5.354271845828009,
+      "best_end_drift": 15.8580154428027,
+      "rel_improvement": 62.38159474953168,
+      "rel_end_suppression": 69.23623761810586,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 6,
+      "params": {
+        "damping": 0.23276780199123706,
+        "energy_scale": 1.1008975982968743,
+        "sub_steps": 1,
+        "pre_filter": 0.012252325044189886
+      },
+      "score": 10.354798438931239,
+      "mean_ate": 5.738072498491132,
+      "end_drift": 17.279887349591398,
+      "best_score": 9.555769284617885,
+      "best_mean_ate": 5.354271845828009,
+      "best_end_drift": 15.8580154428027,
+      "rel_improvement": 62.38159474953168,
+      "rel_end_suppression": 69.23623761810586,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 7,
+      "params": {
+        "damping": 0.24825940815590966,
+        "energy_scale": 1.3611152177255723,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 9.922078176281184,
+      "mean_ate": 5.53046212480086,
+      "end_drift": 16.50950225350167,
+      "best_score": 9.555769284617885,
+      "best_mean_ate": 5.354271845828009,
+      "best_end_drift": 15.8580154428027,
+      "rel_improvement": 62.38159474953168,
+      "rel_end_suppression": 69.23623761810586,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 8,
+      "params": {
+        "damping": 0.28569070124917734,
+        "energy_scale": 1.2852503851699384,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 9.0153004862836,
+      "mean_ate": 5.094199204093541,
+      "end_drift": 14.89695240956869,
+      "best_score": 9.0153004862836,
+      "best_mean_ate": 5.094199204093541,
+      "best_end_drift": 14.89695240956869,
+      "rel_improvement": 64.20883070486522,
+      "rel_end_suppression": 71.10065217206271,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 9,
+      "params": {
+        "damping": 0.2860427438195395,
+        "energy_scale": 1.2842411421727733,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 9.007593961861076,
+      "mean_ate": 5.09049056242644,
+      "end_drift": 14.88324906101303,
+      "best_score": 9.007593961861076,
+      "best_mean_ate": 5.09049056242644,
+      "best_end_drift": 14.88324906101303,
+      "rel_improvement": 64.23488713031,
+      "rel_end_suppression": 71.12723598769355,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 10,
+      "params": {
+        "damping": 0.28227912135885086,
+        "energy_scale": 1.2541836085624174,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 9.090708892247115,
+      "mean_ate": 5.130488433091214,
+      "end_drift": 15.031039580980964,
+      "best_score": 9.007593961861076,
+      "best_mean_ate": 5.09049056242644,
+      "best_end_drift": 14.88324906101303,
+      "rel_improvement": 64.23488713031,
+      "rel_end_suppression": 71.12723598769355,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 11,
+      "params": {
+        "damping": 0.23934929065534874,
+        "energy_scale": 1.229007978667413,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 10.166751202827562,
+      "mean_ate": 5.648082553326119,
+      "end_drift": 16.944754177079727,
+      "best_score": 9.007593961861076,
+      "best_mean_ate": 5.09049056242644,
+      "best_end_drift": 14.88324906101303,
+      "rel_improvement": 64.23488713031,
+      "rel_end_suppression": 71.12723598769355,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 12,
+      "params": {
+        "damping": 0.21631045937413534,
+        "energy_scale": 1.225097981167209,
+        "sub_steps": 1,
+        "pre_filter": 0.017826153982633243
+      },
+      "score": 10.859973640744286,
+      "mean_ate": 5.980366800669503,
+      "end_drift": 18.179383900856458,
+      "best_score": 9.007593961861076,
+      "best_mean_ate": 5.09049056242644,
+      "best_end_drift": 14.88324906101303,
+      "rel_improvement": 64.23488713031,
+      "rel_end_suppression": 71.12723598769355,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 13,
+      "params": {
+        "damping": 0.29914090300951307,
+        "energy_scale": 1.0798087838361146,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 8.730419569134845,
+      "mean_ate": 4.957112110566362,
+      "end_drift": 14.390380756987568,
+      "best_score": 8.730419569134845,
+      "best_mean_ate": 4.957112110566362,
+      "best_end_drift": 14.390380756987568,
+      "rel_improvement": 65.17198647793876,
+      "rel_end_suppression": 72.08337601954653,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 14,
+      "params": {
+        "damping": 0.3622328783108545,
+        "energy_scale": 1.073887620748354,
+        "sub_steps": 1,
+        "pre_filter": 0.0
+      },
+      "score": 7.614204815242669,
+      "mean_ate": 4.420590346836234,
+      "end_drift": 12.40462651785232,
+      "best_score": 7.614204815242669,
+      "best_mean_ate": 4.420590346836234,
+      "best_end_drift": 12.40462651785232,
+      "rel_improvement": 68.94151737118662,
+      "rel_end_suppression": 75.93564062238633,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 15,
+      "params": {
+        "damping": 0.37610719524655334,
+        "energy_scale": 1.0270985476056689,
+        "sub_steps": 1,
+        "pre_filter": 0.10285102786044564
+      },
+      "score": 7.40300643398912,
+      "mean_ate": 4.316776357152686,
+      "end_drift": 12.032351549243769,
+      "best_score": 7.40300643398912,
+      "best_mean_ate": 4.316776357152686,
+      "best_end_drift": 12.032351549243769,
+      "rel_improvement": 69.67090072097425,
+      "rel_end_suppression": 76.65783557271338,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 16,
+      "params": {
+        "damping": 0.34865491139917393,
+        "energy_scale": 1.0341609631797393,
+        "sub_steps": 2,
+        "pre_filter": 0.11984357874319289
+      },
+      "score": 7.820130953951157,
+      "mean_ate": 4.516180329331258,
+      "end_drift": 12.776056890881005,
+      "best_score": 7.40300643398912,
+      "best_mean_ate": 4.316776357152686,
+      "best_end_drift": 12.032351549243769,
+      "rel_improvement": 69.67090072097425,
+      "rel_end_suppression": 76.65783557271338,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 17,
+      "params": {
+        "damping": 0.3139781864660418,
+        "energy_scale": 1.0857303132371703,
+        "sub_steps": 1,
+        "pre_filter": 0.1898953784086611
+      },
+      "score": 8.424616373188808,
+      "mean_ate": 4.804219911498966,
+      "end_drift": 13.85521106572357,
+      "best_score": 7.40300643398912,
+      "best_mean_ate": 4.316776357152686,
+      "best_end_drift": 12.032351549243769,
+      "rel_improvement": 69.67090072097425,
+      "rel_end_suppression": 76.65783557271338,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 18,
+      "params": {
+        "damping": 0.3447633612557225,
+        "energy_scale": 1.3664331348939944,
+        "sub_steps": 2,
+        "pre_filter": 0.05430102154444316
+      },
+      "score": 7.887722309727174,
+      "mean_ate": 4.550450555738953,
+      "end_drift": 12.893629940709506,
+      "best_score": 7.40300643398912,
+      "best_mean_ate": 4.316776357152686,
+      "best_end_drift": 12.032351549243769,
+      "rel_improvement": 69.67090072097425,
+      "rel_end_suppression": 76.65783557271338,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 19,
+      "params": {
+        "damping": 0.37685810552303023,
+        "energy_scale": 1.1119278795354652,
+        "sub_steps": 1,
+        "pre_filter": 0.12940508638137174
+      },
+      "score": 7.390622752851405,
+      "mean_ate": 4.310098957026299,
+      "end_drift": 12.011408446589062,
+      "best_score": 7.390622752851405,
+      "best_mean_ate": 4.310098957026299,
+      "best_end_drift": 12.011408446589062,
+      "rel_improvement": 69.71781525038308,
+      "rel_end_suppression": 76.6984641517391,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 20,
+      "params": {
+        "damping": 0.42313392375135384,
+        "energy_scale": 1.0982942552412986,
+        "sub_steps": 1,
+        "pre_filter": 0.10889470151007984
+      },
+      "score": 6.7873099821141665,
+      "mean_ate": 4.022230844330487,
+      "end_drift": 10.934928688789684,
+      "best_score": 6.7873099821141665,
+      "best_mean_ate": 4.022230844330487,
+      "best_end_drift": 10.934928688789684,
+      "rel_improvement": 71.74033850543906,
+      "rel_end_suppression": 78.7867814192626,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 21,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1381747301133665,
+        "sub_steps": 1,
+        "pre_filter": 0.15521228611578722
+      },
+      "score": 6.480928443265702,
+      "mean_ate": 3.875081681128967,
+      "end_drift": 10.389698586470805,
+      "best_score": 6.480928443265702,
+      "best_mean_ate": 3.875081681128967,
+      "best_end_drift": 10.389698586470805,
+      "rel_improvement": 72.77418904814081,
+      "rel_end_suppression": 79.84450073929305,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 22,
+      "params": {
+        "damping": 0.3764565781895043,
+        "energy_scale": 1.1715286154902818,
+        "sub_steps": 1,
+        "pre_filter": 0.2509522925038496
+      },
+      "score": 7.387632985905539,
+      "mean_ate": 4.304592598766883,
+      "end_drift": 12.012193566613524,
+      "best_score": 6.480928443265702,
+      "best_mean_ate": 3.875081681128967,
+      "best_end_drift": 10.389698586470805,
+      "rel_improvement": 72.77418904814081,
+      "rel_end_suppression": 79.84450073929305,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 23,
+      "params": {
+        "damping": 0.3960124341685518,
+        "energy_scale": 1.3031676192425776,
+        "sub_steps": 1,
+        "pre_filter": 0.1828449560398866
+      },
+      "score": 7.123273354736716,
+      "mean_ate": 4.180560584347944,
+      "end_drift": 11.537342510319872,
+      "best_score": 6.480928443265702,
+      "best_mean_ate": 3.875081681128967,
+      "best_end_drift": 10.389698586470805,
+      "rel_improvement": 72.77418904814081,
+      "rel_end_suppression": 79.84450073929305,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 24,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1966993767416902,
+        "sub_steps": 1,
+        "pre_filter": 0.16869872020866142
+      },
+      "score": 6.480153770950626,
+      "mean_ate": 3.8743392876739122,
+      "end_drift": 10.388875495865697,
+      "best_score": 6.480153770950626,
+      "best_mean_ate": 3.8743392876739122,
+      "best_end_drift": 10.388875495865697,
+      "rel_improvement": 72.77940500628632,
+      "rel_end_suppression": 79.84609749418875,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 25,
+      "params": {
+        "damping": 0.43343266687138365,
+        "energy_scale": 1.1937706683959957,
+        "sub_steps": 1,
+        "pre_filter": 0.16625524368850783
+      },
+      "score": 6.663936552396506,
+      "mean_ate": 3.961866303273084,
+      "end_drift": 10.717041926081638,
+      "best_score": 6.480153770950626,
+      "best_mean_ate": 3.8743392876739122,
+      "best_end_drift": 10.388875495865697,
+      "rel_improvement": 72.77940500628632,
+      "rel_end_suppression": 79.84609749418875,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 26,
+      "params": {
+        "damping": 0.37115540055691637,
+        "energy_scale": 1.2401434560879783,
+        "sub_steps": 1,
+        "pre_filter": 0.15054212062654032
+      },
+      "score": 7.472020577872245,
+      "mean_ate": 4.348459814822501,
+      "end_drift": 12.157361722446861,
+      "best_score": 6.480153770950626,
+      "best_mean_ate": 3.8743392876739122,
+      "best_end_drift": 10.388875495865697,
+      "rel_improvement": 72.77940500628632,
+      "rel_end_suppression": 79.84609749418875,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 27,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.053715672015275,
+        "sub_steps": 2,
+        "pre_filter": 0.16323203785766016
+      },
+      "score": 6.479628026424742,
+      "mean_ate": 3.8741124653490395,
+      "end_drift": 10.387901368038296,
+      "best_score": 6.479628026424742,
+      "best_mean_ate": 3.8741124653490395,
+      "best_end_drift": 10.387901368038296,
+      "rel_improvement": 72.7809986299167,
+      "rel_end_suppression": 79.84798725379456,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 28,
+      "params": {
+        "damping": 0.44522389006611907,
+        "energy_scale": 0.9588713573839565,
+        "sub_steps": 2,
+        "pre_filter": 0.23590424371242086
+      },
+      "score": 6.526782179960106,
+      "mean_ate": 3.894311511381027,
+      "end_drift": 10.475488182828725,
+      "best_score": 6.479628026424742,
+      "best_mean_ate": 3.8741124653490395,
+      "best_end_drift": 10.387901368038296,
+      "rel_improvement": 72.7809986299167,
+      "rel_end_suppression": 79.84798725379456,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 29,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1363998421214843,
+        "sub_steps": 2,
+        "pre_filter": 0.14472736774777076
+      },
+      "score": 6.480671223678012,
+      "mean_ate": 3.8751122799012627,
+      "end_drift": 10.389009639343136,
+      "best_score": 6.479628026424742,
+      "best_mean_ate": 3.8741124653490395,
+      "best_end_drift": 10.387901368038296,
+      "rel_improvement": 72.7809986299167,
+      "rel_end_suppression": 79.84798725379456,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 30,
+      "params": {
+        "damping": 0.40392410398628026,
+        "energy_scale": 1.0345529148349613,
+        "sub_steps": 2,
+        "pre_filter": 0.21654923100171863
+      },
+      "score": 7.016959931474027,
+      "mean_ate": 4.128538010174981,
+      "end_drift": 11.349592813422598,
+      "best_score": 6.479628026424742,
+      "best_mean_ate": 3.8741124653490395,
+      "best_end_drift": 10.387901368038296,
+      "rel_improvement": 72.7809986299167,
+      "rel_end_suppression": 79.84798725379456,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 31,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.205093881357905,
+        "sub_steps": 2,
+        "pre_filter": 0.14037343210443043
+      },
+      "score": 6.480910206192543,
+      "mean_ate": 3.8753413491699242,
+      "end_drift": 10.38926349172647,
+      "best_score": 6.479628026424742,
+      "best_mean_ate": 3.8741124653490395,
+      "best_end_drift": 10.387901368038296,
+      "rel_improvement": 72.7809986299167,
+      "rel_end_suppression": 79.84798725379456,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 32,
+      "params": {
+        "damping": 0.39466179208324037,
+        "energy_scale": 1.1818544998910767,
+        "sub_steps": 2,
+        "pre_filter": 0.09584640235644536
+      },
+      "score": 7.145603042720991,
+      "mean_ate": 4.193612333123995,
+      "end_drift": 11.573589107116483,
+      "best_score": 6.479628026424742,
+      "best_mean_ate": 3.8741124653490395,
+      "best_end_drift": 10.387901368038296,
+      "rel_improvement": 72.7809986299167,
+      "rel_end_suppression": 79.84798725379456,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 33,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.088524020543909,
+        "sub_steps": 2,
+        "pre_filter": 0.2416832811066158
+      },
+      "score": 6.4746453363531655,
+      "mean_ate": 3.869339489239576,
+      "end_drift": 10.38260410702355,
+      "best_score": 6.4746453363531655,
+      "best_mean_ate": 3.869339489239576,
+      "best_end_drift": 10.38260410702355,
+      "rel_improvement": 72.81453292826886,
+      "rel_end_suppression": 79.85826367707843,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 34,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1469659859445744,
+        "sub_steps": 2,
+        "pre_filter": 0.27118045654612166
+      },
+      "score": 6.472497082948318,
+      "mean_ate": 3.8672829487818565,
+      "end_drift": 10.380318284198012,
+      "best_score": 6.472497082948318,
+      "best_mean_ate": 3.8672829487818565,
+      "best_end_drift": 10.380318284198012,
+      "rel_improvement": 72.8289819093031,
+      "rel_end_suppression": 79.86269805983619,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 35,
+      "params": {
+        "damping": 0.4382141633742122,
+        "energy_scale": 1.1420960600585337,
+        "sub_steps": 2,
+        "pre_filter": 0.2554821010428946
+      },
+      "score": 6.6029779804244955,
+      "mean_ate": 3.9298680036858986,
+      "end_drift": 10.612642945532391,
+      "best_score": 6.472497082948318,
+      "best_mean_ate": 3.8672829487818565,
+      "best_end_drift": 10.380318284198012,
+      "rel_improvement": 72.8289819093031,
+      "rel_end_suppression": 79.86269805983619,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 36,
+      "params": {
+        "damping": 0.4393608508927528,
+        "energy_scale": 1.0916592430387195,
+        "sub_steps": 2,
+        "pre_filter": 0.2561381780048797
+      },
+      "score": 6.590096400865993,
+      "mean_ate": 3.9237177580324647,
+      "end_drift": 10.589664365116285,
+      "best_score": 6.472497082948318,
+      "best_mean_ate": 3.8672829487818565,
+      "best_end_drift": 10.380318284198012,
+      "rel_improvement": 72.8289819093031,
+      "rel_end_suppression": 79.86269805983619,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 37,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.0078527433052369,
+        "sub_steps": 2,
+        "pre_filter": 0.27719671912361865
+      },
+      "score": 6.472037600611193,
+      "mean_ate": 3.8668431849525615,
+      "end_drift": 10.37982922409914,
+      "best_score": 6.472037600611193,
+      "best_mean_ate": 3.8668431849525615,
+      "best_end_drift": 10.37982922409914,
+      "rel_improvement": 72.83207163175672,
+      "rel_end_suppression": 79.86364681213917,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 38,
+      "params": {
+        "damping": 0.4412544103281577,
+        "energy_scale": 0.9932918879033661,
+        "sub_steps": 2,
+        "pre_filter": 0.2932549755143326
+      },
+      "score": 6.566136770270411,
+      "mean_ate": 3.9109370664969174,
+      "end_drift": 10.54893632593065,
+      "best_score": 6.472037600611193,
+      "best_mean_ate": 3.8668431849525615,
+      "best_end_drift": 10.37982922409914,
+      "rel_improvement": 72.83207163175672,
+      "rel_end_suppression": 79.86364681213917,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 39,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.0489132424245136,
+        "sub_steps": 2,
+        "pre_filter": 0.28613886667536886
+      },
+      "score": 6.471340484364966,
+      "mean_ate": 3.8661760542144834,
+      "end_drift": 10.379087129590689,
+      "best_score": 6.471340484364966,
+      "best_mean_ate": 3.8661760542144834,
+      "best_end_drift": 10.379087129590689,
+      "rel_improvement": 72.83675880401519,
+      "rel_end_suppression": 79.86508643862997,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 40,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.061704628706042,
+        "sub_steps": 2,
+        "pre_filter": 0.21720476255996424
+      },
+      "score": 6.4763062574201715,
+      "mean_ate": 3.8709300405465443,
+      "end_drift": 10.384370582730613,
+      "best_score": 6.471340484364966,
+      "best_mean_ate": 3.8661760542144834,
+      "best_end_drift": 10.379087129590689,
+      "rel_improvement": 72.83675880401519,
+      "rel_end_suppression": 79.86508643862997,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 41,
+      "params": {
+        "damping": 0.4259569607684471,
+        "energy_scale": 1.1770064720629612,
+        "sub_steps": 1,
+        "pre_filter": 0.2801041750926868
+      },
+      "score": 6.742623558224745,
+      "mean_ate": 3.995540111331388,
+      "end_drift": 10.863248728564777,
+      "best_score": 6.471340484364966,
+      "best_mean_ate": 3.8661760542144834,
+      "best_end_drift": 10.379087129590689,
+      "rel_improvement": 72.83675880401519,
+      "rel_end_suppression": 79.86508643862997,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 42,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.0414982373877344,
+        "sub_steps": 2,
+        "pre_filter": 0.29162692464638473
+      },
+      "score": 6.4709040114604015,
+      "mean_ate": 3.8657583979932717,
+      "end_drift": 10.378622431661098,
+      "best_score": 6.4709040114604015,
+      "best_mean_ate": 3.8657583979932717,
+      "best_end_drift": 10.378622431661098,
+      "rel_improvement": 72.83969320134078,
+      "rel_end_suppression": 79.86598792953447,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 43,
+      "params": {
+        "damping": 0.4407817081666585,
+        "energy_scale": 1.043914238878859,
+        "sub_steps": 2,
+        "pre_filter": 0.3379344875899318
+      },
+      "score": 6.567473769438049,
+      "mean_ate": 3.90969905352073,
+      "end_drift": 10.554135843314027,
+      "best_score": 6.4709040114604015,
+      "best_mean_ate": 3.8657583979932717,
+      "best_end_drift": 10.378622431661098,
+      "rel_improvement": 72.83969320134078,
+      "rel_end_suppression": 79.86598792953447,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 44,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.0312083713154632,
+        "sub_steps": 2,
+        "pre_filter": 0.27007503200502525
+      },
+      "score": 6.472580691957331,
+      "mean_ate": 3.8673629736272916,
+      "end_drift": 10.38040726945239,
+      "best_score": 6.4709040114604015,
+      "best_mean_ate": 3.8657583979932717,
+      "best_end_drift": 10.378622431661098,
+      "rel_improvement": 72.83969320134078,
+      "rel_end_suppression": 79.86598792953447,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 45,
+      "params": {
+        "damping": 0.44533994080508454,
+        "energy_scale": 1.0799110573471,
+        "sub_steps": 2,
+        "pre_filter": 0.2604568128939324
+      },
+      "score": 6.5237492119747635,
+      "mean_ate": 3.892020308180643,
+      "end_drift": 10.471342567665944,
+      "best_score": 6.4709040114604015,
+      "best_mean_ate": 3.8657583979932717,
+      "best_end_drift": 10.378622431661098,
+      "rel_improvement": 72.83969320134078,
+      "rel_end_suppression": 79.86598792953447,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 46,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1117700710836118,
+        "sub_steps": 2,
+        "pre_filter": 0.23840905931236692
+      },
+      "score": 6.4748736277415935,
+      "mean_ate": 3.869558080663735,
+      "end_drift": 10.382846948358381,
+      "best_score": 6.4709040114604015,
+      "best_mean_ate": 3.8657583979932717,
+      "best_end_drift": 10.378622431661098,
+      "rel_improvement": 72.83969320134078,
+      "rel_end_suppression": 79.86598792953447,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 47,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.0992445912993998,
+        "sub_steps": 2,
+        "pre_filter": 0.325795606644838
+      },
+      "score": 6.468028271128822,
+      "mean_ate": 3.8630074499134244,
+      "end_drift": 10.375559502951917,
+      "best_score": 6.468028271128822,
+      "best_mean_ate": 3.8630074499134244,
+      "best_end_drift": 10.375559502951917,
+      "rel_improvement": 72.8590209984102,
+      "rel_end_suppression": 79.8719298591121,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 48,
+      "params": {
+        "damping": 0.44698749966183393,
+        "energy_scale": 1.1622137660468972,
+        "sub_steps": 2,
+        "pre_filter": 0.32933041712107586
+      },
+      "score": 6.500196731877547,
+      "mean_ate": 3.878126316911012,
+      "end_drift": 10.433302354327349,
+      "best_score": 6.468028271128822,
+      "best_mean_ate": 3.8630074499134244,
+      "best_end_drift": 10.375559502951917,
+      "rel_improvement": 72.8590209984102,
+      "rel_end_suppression": 79.8719298591121,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 49,
+      "params": {
+        "damping": 0.4472919647914192,
+        "energy_scale": 0.9957185706682765,
+        "sub_steps": 2,
+        "pre_filter": 0.28987850760959555
+      },
+      "score": 6.500244311996877,
+      "mean_ate": 3.879759992911865,
+      "end_drift": 10.430970790624393,
+      "best_score": 6.468028271128822,
+      "best_mean_ate": 3.8630074499134244,
+      "best_end_drift": 10.375559502951917,
+      "rel_improvement": 72.8590209984102,
+      "rel_end_suppression": 79.8719298591121,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 50,
+      "params": {
+        "damping": 0.41806051080406076,
+        "energy_scale": 1.0842478602633345,
+        "sub_steps": 2,
+        "pre_filter": 0.32385248725289656
+      },
+      "score": 6.832083418426701,
+      "mean_ate": 4.0361994675338515,
+      "end_drift": 11.025909344765976,
+      "best_score": 6.468028271128822,
+      "best_mean_ate": 3.8630074499134244,
+      "best_end_drift": 10.375559502951917,
+      "rel_improvement": 72.8590209984102,
+      "rel_end_suppression": 79.8719298591121,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 51,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1683153591669202,
+        "sub_steps": 2,
+        "pre_filter": 0.314483678347633
+      },
+      "score": 6.469011753326718,
+      "mean_ate": 3.8639480944507514,
+      "end_drift": 10.37660724164067,
+      "best_score": 6.468028271128822,
+      "best_mean_ate": 3.8630074499134244,
+      "best_end_drift": 10.375559502951917,
+      "rel_improvement": 72.8590209984102,
+      "rel_end_suppression": 79.8719298591121,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 52,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1271254820706127,
+        "sub_steps": 2,
+        "pre_filter": 0.3465970799113369
+      },
+      "score": 6.466131755617036,
+      "mean_ate": 3.8611940092077717,
+      "end_drift": 10.373538375230932,
+      "best_score": 6.466131755617036,
+      "best_mean_ate": 3.8611940092077717,
+      "best_end_drift": 10.373538375230932,
+      "rel_improvement": 72.87176199276523,
+      "rel_end_suppression": 79.87585074651294,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 53,
+      "params": {
+        "damping": 0.4172931308630524,
+        "energy_scale": 1.264502923560534,
+        "sub_steps": 2,
+        "pre_filter": 0.3399582918148176
+      },
+      "score": 6.83983819313255,
+      "mean_ate": 4.039159717667931,
+      "end_drift": 11.04085590632948,
+      "best_score": 6.466131755617036,
+      "best_mean_ate": 3.8611940092077717,
+      "best_end_drift": 10.373538375230932,
+      "rel_improvement": 72.87176199276523,
+      "rel_end_suppression": 79.87585074651294,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 54,
+      "params": {
+        "damping": 0.4329842168048152,
+        "energy_scale": 1.0853455628306803,
+        "sub_steps": 3,
+        "pre_filter": 0.3798588269021731
+      },
+      "score": 6.650739415000485,
+      "mean_ate": 3.9472057060988264,
+      "end_drift": 10.706039978352974,
+      "best_score": 6.466131755617036,
+      "best_mean_ate": 3.8611940092077717,
+      "best_end_drift": 10.373538375230932,
+      "rel_improvement": 72.87176199276523,
+      "rel_end_suppression": 79.87585074651294,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 55,
+      "params": {
+        "damping": 0.41626576581687386,
+        "energy_scale": 1.2253892120535963,
+        "sub_steps": 2,
+        "pre_filter": 0.33679953580055016
+      },
+      "score": 6.852641241592696,
+      "mean_ate": 4.045404035524421,
+      "end_drift": 11.06349705069511,
+      "best_score": 6.466131755617036,
+      "best_mean_ate": 3.8611940092077717,
+      "best_end_drift": 10.373538375230932,
+      "rel_improvement": 72.87176199276523,
+      "rel_end_suppression": 79.87585074651294,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 56,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1261638934087672,
+        "sub_steps": 2,
+        "pre_filter": 0.3192701866956865
+      },
+      "score": 6.468599554972947,
+      "mean_ate": 3.8635538300797547,
+      "end_drift": 10.376168142312734,
+      "best_score": 6.466131755617036,
+      "best_mean_ate": 3.8611940092077717,
+      "best_end_drift": 10.373538375230932,
+      "rel_improvement": 72.87176199276523,
+      "rel_end_suppression": 79.87585074651294,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 57,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.0999893709031159,
+        "sub_steps": 2,
+        "pre_filter": 0.4206810073667833
+      },
+      "score": 6.4582833063498715,
+      "mean_ate": 3.853695857303077,
+      "end_drift": 10.365164479920063,
+      "best_score": 6.4582833063498715,
+      "best_mean_ate": 3.853695857303077,
+      "best_end_drift": 10.365164479920063,
+      "rel_improvement": 72.92444301552656,
+      "rel_end_suppression": 79.89209568753242,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 58,
+      "params": {
+        "damping": 0.42541163951778344,
+        "energy_scale": 1.113732013705484,
+        "sub_steps": 2,
+        "pre_filter": 0.4073935763235717
+      },
+      "score": 6.735590589803003,
+      "mean_ate": 3.9860854939389716,
+      "end_drift": 10.85984823359905,
+      "best_score": 6.4582833063498715,
+      "best_mean_ate": 3.853695857303077,
+      "best_end_drift": 10.365164479920063,
+      "rel_improvement": 72.92444301552656,
+      "rel_end_suppression": 79.89209568753242,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 59,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.0492736332611576,
+        "sub_steps": 2,
+        "pre_filter": 0.4118573994187045
+      },
+      "score": 6.45932068944855,
+      "mean_ate": 3.8546863435798393,
+      "end_drift": 10.366272208251614,
+      "best_score": 6.4582833063498715,
+      "best_mean_ate": 3.853695857303077,
+      "best_end_drift": 10.365164479920063,
+      "rel_improvement": 72.92444301552656,
+      "rel_end_suppression": 79.89209568753242,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 60,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1824726567438455,
+        "sub_steps": 2,
+        "pre_filter": 0.4231598285510047
+      },
+      "score": 6.457986225128387,
+      "mean_ate": 3.853412239265631,
+      "end_drift": 10.36484720392252,
+      "best_score": 6.457986225128387,
+      "best_mean_ate": 3.853412239265631,
+      "best_end_drift": 10.36484720392252,
+      "rel_improvement": 72.9264356783155,
+      "rel_end_suppression": 79.89271118721035,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 61,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.2194245731948825,
+        "sub_steps": 2,
+        "pre_filter": 0.42921233949392923
+      },
+      "score": 6.457250121100474,
+      "mean_ate": 3.852709557411304,
+      "end_drift": 10.364060966634227,
+      "best_score": 6.457250121100474,
+      "best_mean_ate": 3.852709557411304,
+      "best_end_drift": 10.364060966634227,
+      "rel_improvement": 72.93137262801086,
+      "rel_end_suppression": 79.89423644850172,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 62,
+      "params": {
+        "damping": 0.44523186633144896,
+        "energy_scale": 1.2261969372841837,
+        "sub_steps": 2,
+        "pre_filter": 0.4494623267316268
+      },
+      "score": 6.506131236490035,
+      "mean_ate": 3.8746316205001246,
+      "end_drift": 10.453380660474902,
+      "best_score": 6.457250121100474,
+      "best_mean_ate": 3.852709557411304,
+      "best_end_drift": 10.364060966634227,
+      "rel_improvement": 72.93137262801086,
+      "rel_end_suppression": 79.89423644850172,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 63,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.2612802451207112,
+        "sub_steps": 2,
+        "pre_filter": 0.4390553434668186
+      },
+      "score": 6.456019470826321,
+      "mean_ate": 3.8515349844474867,
+      "end_drift": 10.362746200394572,
+      "best_score": 6.456019470826321,
+      "best_mean_ate": 3.8515349844474867,
+      "best_end_drift": 10.362746200394572,
+      "rel_improvement": 72.93962502217788,
+      "rel_end_suppression": 79.89678702970971,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 64,
+      "params": {
+        "damping": 0.4293752825658156,
+        "energy_scale": 1.333624792115254,
+        "sub_steps": 1,
+        "pre_filter": 0.4364052077288886
+      },
+      "score": 6.6866341349925,
+      "mean_ate": 3.9612244349659567,
+      "end_drift": 10.774748685032312,
+      "best_score": 6.456019470826321,
+      "best_mean_ate": 3.8515349844474867,
+      "best_end_drift": 10.362746200394572,
+      "rel_improvement": 72.93962502217788,
+      "rel_end_suppression": 79.89678702970971,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 65,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1846820458446836,
+        "sub_steps": 2,
+        "pre_filter": 0.4186641281006872
+      },
+      "score": 6.458523175555497,
+      "mean_ate": 3.853924866804215,
+      "end_drift": 10.365420638682417,
+      "best_score": 6.456019470826321,
+      "best_mean_ate": 3.8515349844474867,
+      "best_end_drift": 10.362746200394572,
+      "rel_improvement": 72.93962502217788,
+      "rel_end_suppression": 79.89678702970971,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 66,
+      "params": {
+        "damping": 0.44319926308492075,
+        "energy_scale": 1.3136097352667246,
+        "sub_steps": 2,
+        "pre_filter": 0.37903366641558467
+      },
+      "score": 6.536707605164036,
+      "mean_ate": 3.893135418156308,
+      "end_drift": 10.502065885675629,
+      "best_score": 6.456019470826321,
+      "best_mean_ate": 3.8515349844474867,
+      "best_end_drift": 10.362746200394572,
+      "rel_improvement": 72.93962502217788,
+      "rel_end_suppression": 79.89678702970971,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 67,
+      "params": {
+        "damping": 0.43226478008177055,
+        "energy_scale": 1.3144265211504687,
+        "sub_steps": 2,
+        "pre_filter": 0.48985871566721473
+      },
+      "score": 6.64484742014581,
+      "mean_ate": 3.937591992533378,
+      "end_drift": 10.705730561564456,
+      "best_score": 6.456019470826321,
+      "best_mean_ate": 3.8515349844474867,
+      "best_end_drift": 10.362746200394572,
+      "rel_improvement": 72.93962502217788,
+      "rel_end_suppression": 79.89678702970971,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 68,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.242910961905311,
+        "sub_steps": 2,
+        "pre_filter": 0.43975608719139037
+      },
+      "score": 6.4559302276133685,
+      "mean_ate": 3.851449817536353,
+      "end_drift": 10.362650842728893,
+      "best_score": 6.4559302276133685,
+      "best_mean_ate": 3.851449817536353,
+      "best_end_drift": 10.362650842728893,
+      "rel_improvement": 72.94022339362208,
+      "rel_end_suppression": 79.89697201884528,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 69,
+      "params": {
+        "damping": 0.4330352804149702,
+        "energy_scale": 1.2094118219869134,
+        "sub_steps": 2,
+        "pre_filter": 0.4850678444466506
+      },
+      "score": 6.636814327030839,
+      "mean_ate": 3.934140844547653,
+      "end_drift": 10.690824550755616,
+      "best_score": 6.4559302276133685,
+      "best_mean_ate": 3.851449817536353,
+      "best_end_drift": 10.362650842728893,
+      "rel_improvement": 72.94022339362208,
+      "rel_end_suppression": 79.89697201884528,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 70,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1900286415258747,
+        "sub_steps": 2,
+        "pre_filter": 0.4424114158597117
+      },
+      "score": 6.455590045336844,
+      "mean_ate": 3.8511251855803406,
+      "end_drift": 10.3622873349716,
+      "best_score": 6.455590045336844,
+      "best_mean_ate": 3.8511251855803406,
+      "best_end_drift": 10.3622873349716,
+      "rel_improvement": 72.94250421477389,
+      "rel_end_suppression": 79.89767720584106,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 71,
+      "params": {
+        "damping": 0.4335799947881251,
+        "energy_scale": 1.1000030480113967,
+        "sub_steps": 2,
+        "pre_filter": 0.4336277696481241
+      },
+      "score": 6.637899677726113,
+      "mean_ate": 3.9381271840377865,
+      "end_drift": 10.6875584182586,
+      "best_score": 6.455590045336844,
+      "best_mean_ate": 3.8511251855803406,
+      "best_end_drift": 10.3622873349716,
+      "rel_improvement": 72.94250421477389,
+      "rel_end_suppression": 79.89767720584106,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 72,
+      "params": {
+        "damping": 0.44345860476170373,
+        "energy_scale": 1.2012812030198312,
+        "sub_steps": 2,
+        "pre_filter": 0.43424419899623884
+      },
+      "score": 6.5274825120940045,
+      "mean_ate": 3.885701012786244,
+      "end_drift": 10.490154761055646,
+      "best_score": 6.455590045336844,
+      "best_mean_ate": 3.8511251855803406,
+      "best_end_drift": 10.3622873349716,
+      "rel_improvement": 72.94250421477389,
+      "rel_end_suppression": 79.89767720584106,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 73,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.2262023590543676,
+        "sub_steps": 2,
+        "pre_filter": 0.42610334279659284
+      },
+      "score": 6.457630154453463,
+      "mean_ate": 3.853072324428383,
+      "end_drift": 10.364466899491084,
+      "best_score": 6.455590045336844,
+      "best_mean_ate": 3.8511251855803406,
+      "best_end_drift": 10.3622873349716,
+      "rel_improvement": 72.94250421477389,
+      "rel_end_suppression": 79.89767720584106,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 74,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.2168689822622494,
+        "sub_steps": 2,
+        "pre_filter": 0.4754453043762977
+      },
+      "score": 6.4510733982188695,
+      "mean_ate": 3.8468167970313845,
+      "end_drift": 10.357458300000097,
+      "best_score": 6.4510733982188695,
+      "best_mean_ate": 3.8468167970313845,
+      "best_end_drift": 10.357458300000097,
+      "rel_improvement": 72.9727743824228,
+      "rel_end_suppression": 79.90704529385516,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 75,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1819698341002955,
+        "sub_steps": 2,
+        "pre_filter": 0.4919851135345535
+      },
+      "score": 6.448593911659225,
+      "mean_ate": 3.8444530401100336,
+      "end_drift": 10.354805218983014,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 76,
+      "params": {
+        "damping": 0.44135013853312516,
+        "energy_scale": 1.204875543184688,
+        "sub_steps": 2,
+        "pre_filter": 0.45475062836879115
+      },
+      "score": 6.547985965299702,
+      "mean_ate": 3.894130630529074,
+      "end_drift": 10.528768967455644,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 77,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1304315545664834,
+        "sub_steps": 2,
+        "pre_filter": 0.4752148900896313
+      },
+      "score": 6.451106848608857,
+      "mean_ate": 3.846848692877811,
+      "end_drift": 10.357494082205426,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 78,
+      "params": {
+        "damping": 0.4475192035633468,
+        "energy_scale": 1.2452925637720595,
+        "sub_steps": 2,
+        "pre_filter": 0.46541899415376004
+      },
+      "score": 6.47915310575593,
+      "mean_ate": 3.8608018257807504,
+      "end_drift": 10.4066800257187,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 79,
+      "params": {
+        "damping": 0.43462332068769416,
+        "energy_scale": 1.1547302942500925,
+        "sub_steps": 2,
+        "pre_filter": 0.5006706926418756
+      },
+      "score": 6.616287862602305,
+      "mean_ate": 3.9232180202003177,
+      "end_drift": 10.655892626205285,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 80,
+      "params": {
+        "damping": 0.4374180278190562,
+        "energy_scale": 1.1297135520472914,
+        "sub_steps": 2,
+        "pre_filter": 0.4876427540824367
+      },
+      "score": 6.58691669216477,
+      "mean_ate": 3.910291583964067,
+      "end_drift": 10.601854354465825,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 81,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.183584008299297,
+        "sub_steps": 2,
+        "pre_filter": 0.46445849374651527
+      },
+      "score": 6.452636736291701,
+      "mean_ate": 3.848307675193504,
+      "end_drift": 10.359130327938999,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 82,
+      "params": {
+        "damping": 0.4272213272717103,
+        "energy_scale": 1.1333164343855748,
+        "sub_steps": 2,
+        "pre_filter": 0.5326678843237667
+      },
+      "score": 6.695508924686385,
+      "mean_ate": 3.958073262531392,
+      "end_drift": 10.801662417918873,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 83,
+      "params": {
+        "damping": 0.43884464130181705,
+        "energy_scale": 1.1622642055254098,
+        "sub_steps": 2,
+        "pre_filter": 0.45064525532293487
+      },
+      "score": 6.5763503189385215,
+      "mean_ate": 3.907848394890553,
+      "end_drift": 10.579103205010473,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 84,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1913687772404753,
+        "sub_steps": 2,
+        "pre_filter": 0.46051640481507716
+      },
+      "score": 6.453182318068679,
+      "mean_ate": 3.848828062824861,
+      "end_drift": 10.359713700934405,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 85,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1610746242119758,
+        "sub_steps": 2,
+        "pre_filter": 0.45978171999878703
+      },
+      "score": 6.453283127518208,
+      "mean_ate": 3.8489242223477205,
+      "end_drift": 10.35982148527394,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 86,
+      "params": {
+        "damping": 0.44740320163129493,
+        "energy_scale": 1.193883860494679,
+        "sub_steps": 2,
+        "pre_filter": 0.4953576110870325
+      },
+      "score": 6.47594918389094,
+      "mean_ate": 3.8571485476789813,
+      "end_drift": 10.404150138208875,
+      "best_score": 6.448593911659225,
+      "best_mean_ate": 3.8444530401100336,
+      "best_end_drift": 10.354805218983014,
+      "rel_improvement": 72.98938182566464,
+      "rel_end_suppression": 79.91219213926492,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 87,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1364373088214994,
+        "sub_steps": 2,
+        "pre_filter": 0.4944286722552976
+      },
+      "score": 6.448214007197627,
+      "mean_ate": 3.844090954424296,
+      "end_drift": 10.354398586357622,
+      "best_score": 6.448214007197627,
+      "best_mean_ate": 3.844090954424296,
+      "best_end_drift": 10.354398586357622,
+      "rel_improvement": 72.9919257917638,
+      "rel_end_suppression": 79.91298098636304,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 88,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.139307358197895,
+        "sub_steps": 2,
+        "pre_filter": 0.46654643025391834
+      },
+      "score": 6.45234453857758,
+      "mean_ate": 3.848028990618603,
+      "end_drift": 10.358817860516044,
+      "best_score": 6.448214007197627,
+      "best_mean_ate": 3.844090954424296,
+      "best_end_drift": 10.354398586357622,
+      "rel_improvement": 72.9919257917638,
+      "rel_end_suppression": 79.91298098636304,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 89,
+      "params": {
+        "damping": 0.4211580420810127,
+        "energy_scale": 1.1683837045841137,
+        "sub_steps": 2,
+        "pre_filter": 0.5120089398359448
+      },
+      "score": 6.770654880278174,
+      "mean_ate": 3.995512999407719,
+      "end_drift": 10.933367701583856,
+      "best_score": 6.448214007197627,
+      "best_mean_ate": 3.844090954424296,
+      "best_end_drift": 10.354398586357622,
+      "rel_improvement": 72.9919257917638,
+      "rel_end_suppression": 79.91298098636304,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 90,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.0543327763905788,
+        "sub_steps": 2,
+        "pre_filter": 0.4979269929153046
+      },
+      "score": 6.447663757539502,
+      "mean_ate": 3.8435665539637167,
+      "end_drift": 10.353809562903178,
+      "best_score": 6.447663757539502,
+      "best_mean_ate": 3.8435665539637167,
+      "best_end_drift": 10.353809562903178,
+      "rel_improvement": 72.99561015998559,
+      "rel_end_suppression": 79.91412366261123,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 91,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.045887721762277,
+        "sub_steps": 2,
+        "pre_filter": 0.4981625935971028
+      },
+      "score": 6.447626427573132,
+      "mean_ate": 3.8435309793954335,
+      "end_drift": 10.35376959983968,
+      "best_score": 6.447626427573132,
+      "best_mean_ate": 3.8435309793954335,
+      "best_end_drift": 10.35376959983968,
+      "rel_improvement": 72.99586010219339,
+      "rel_end_suppression": 79.91420118896968,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 92,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.02202226647133,
+        "sub_steps": 2,
+        "pre_filter": 0.48958292990021574
+      },
+      "score": 6.44896387977181,
+      "mean_ate": 3.84480567758519,
+      "end_drift": 10.35520118305174,
+      "best_score": 6.447626427573132,
+      "best_mean_ate": 3.8435309793954335,
+      "best_end_drift": 10.35376959983968,
+      "rel_improvement": 72.99586010219339,
+      "rel_end_suppression": 79.91420118896968,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 93,
+      "params": {
+        "damping": 0.43368440262220204,
+        "energy_scale": 1.0175271803565566,
+        "sub_steps": 2,
+        "pre_filter": 0.5176631510250548
+      },
+      "score": 6.624024519512298,
+      "mean_ate": 3.925503024688905,
+      "end_drift": 10.671806761747389,
+      "best_score": 6.447626427573132,
+      "best_mean_ate": 3.8435309793954335,
+      "best_end_drift": 10.35376959983968,
+      "rel_improvement": 72.99586010219339,
+      "rel_end_suppression": 79.91420118896968,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 94,
+      "params": {
+        "damping": 0.44948950986520125,
+        "energy_scale": 1.0391431277731207,
+        "sub_steps": 2,
+        "pre_filter": 0.5133412111049193
+      },
+      "score": 6.450603165369625,
+      "mean_ate": 3.843749288331244,
+      "end_drift": 10.360883980927195,
+      "best_score": 6.447626427573132,
+      "best_mean_ate": 3.8435309793954335,
+      "best_end_drift": 10.35376959983968,
+      "rel_improvement": 72.99586010219339,
+      "rel_end_suppression": 79.91420118896968,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 95,
+      "params": {
+        "damping": 0.44224418169810814,
+        "energy_scale": 1.042317837557024,
+        "sub_steps": 2,
+        "pre_filter": 0.5078464354064933
+      },
+      "score": 6.530103785131955,
+      "mean_ate": 3.881818188668431,
+      "end_drift": 10.502532179827242,
+      "best_score": 6.447626427573132,
+      "best_mean_ate": 3.8435309793954335,
+      "best_end_drift": 10.35376959983968,
+      "rel_improvement": 72.99586010219339,
+      "rel_end_suppression": 79.91420118896968,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 96,
+      "params": {
+        "damping": 0.4309203546173088,
+        "energy_scale": 0.9836831268625633,
+        "sub_steps": 2,
+        "pre_filter": 0.47542544305923223
+      },
+      "score": 6.662475847820021,
+      "mean_ate": 3.947016679090672,
+      "end_drift": 10.735664600914046,
+      "best_score": 6.447626427573132,
+      "best_mean_ate": 3.8435309793954335,
+      "best_end_drift": 10.35376959983968,
+      "rel_improvement": 72.99586010219339,
+      "rel_end_suppression": 79.91420118896968,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 97,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.047351133744665,
+        "sub_steps": 2,
+        "pre_filter": 0.48511092696139724
+      },
+      "score": 6.449643540084471,
+      "mean_ate": 3.845453557100838,
+      "end_drift": 10.355928514559922,
+      "best_score": 6.447626427573132,
+      "best_mean_ate": 3.8435309793954335,
+      "best_end_drift": 10.35376959983968,
+      "rel_improvement": 72.99586010219339,
+      "rel_end_suppression": 79.91420118896968,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 98,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.142839692476828,
+        "sub_steps": 2,
+        "pre_filter": 0.5045844939971762
+      },
+      "score": 6.446595396069321,
+      "mean_ate": 3.842548518104182,
+      "end_drift": 10.352665713017029,
+      "best_score": 6.446595396069321,
+      "best_mean_ate": 3.842548518104182,
+      "best_end_drift": 10.352665713017029,
+      "rel_improvement": 73.00276274517853,
+      "rel_end_suppression": 79.91634267458187,
+      "status": "IMPROVED"
+    },
+    {
+      "iteration": 99,
+      "params": {
+        "damping": 0.45,
+        "energy_scale": 1.1341154433387144,
+        "sub_steps": 2,
+        "pre_filter": 0.4851446072469442
+      },
+      "score": 6.449638464922739,
+      "mean_ate": 3.845448718979077,
+      "end_drift": 10.355923083838231,
+      "best_score": 6.446595396069321,
+      "best_mean_ate": 3.842548518104182,
+      "best_end_drift": 10.352665713017029,
+      "rel_improvement": 73.00276274517853,
+      "rel_end_suppression": 79.91634267458187,
+      "status": "TESTED"
+    },
+    {
+      "iteration": 100,
+      "params": {
+        "damping": 0.4374738562260199,
+        "energy_scale": 1.1562496265540756,
+        "sub_steps": 2,
+        "pre_filter": 0.4590809438739351
+      },
+      "score": 6.590511406121527,
+      "mean_ate": 3.914009940415829,
+      "end_drift": 10.605263604680074,
+      "best_score": 6.446595396069321,
+      "best_mean_ate": 3.842548518104182,
+      "best_end_drift": 10.352665713017029,
+      "rel_improvement": 73.00276274517853,
+      "rel_end_suppression": 79.91634267458187,
+      "status": "TESTED"
+    }
+  ]
+}
