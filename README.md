@@ -43,6 +43,15 @@ A zero-latency acoustic physical-modeling sound engine running entirely client-s
 * **Symplectic Stability:** Employs 2nd-order Symplectic Leapfrog integration at audio sample rate ($44.1\,\text{kHz}$). It can oscillate perpetually (when damping $\gamma = 0$) with bounded Hamiltonian energy without ever clipping or blowing out speakers.
 * **Launch:** Open [`demo/synth.html`](demo/synth.html) directly in any browser.
 
+### 🎮 AKASHA: 3D WebGL Spatial Resonator Game
+
+An interactive 3D spatial WebGL game & physical audio environment built with **Three.js** and the **Web Audio API (HRTF 3D Panning)**:
+
+* **3D Spatial Acoustic Manifold:** Five floating pentatonic resonant crystals positioned in 3D space, each running an independent Hamiltonian Symplectic Leapfrog solver.
+* **Kinetic Orbs & Momentum Collisions:** Click or press Spacebar to launch kinetic energy orbs that strike crystals with momentum transfer $\Delta p$, exciting physical audio and mesh vibration.
+* **Headphone HRTF 3D Panning:** Moving and orbiting the 3D camera dynamically pans acoustic reflections around your ears in real time.
+* **Playable Directly:** Open [`demo/game.html`](demo/game.html) in any web browser.
+
 ### 🔑 Key Scientific Findings
 
 1. **Conservative Systems:** Hamiltonian leapfrog integration strictly bounds energy fluctuations ($|\Delta H|/H_0$), achieving a **+17.0% reduction in energy drift** on the nonlinear pendulum and eliminating runaway tail drift.

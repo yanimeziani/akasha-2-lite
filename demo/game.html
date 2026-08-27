@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AKASHA: Spatial Resonator (Three.js 3D WebGL Game)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; user-select: none; }
+    body { background: #030712; color: #f9fafb; overflow: hidden; width: 100vw; height: 100vh; }
+    #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+    
+    /* HUD Overlays */
+    .hud { position: absolute; pointer-events: none; z-index: 10; padding: 20px; }
+    .hud-top-left { top: 0; left: 0; }
+    .hud-top-right { top: 0; right: 0; text-align: right; }
+    .hud-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; pointer-events: auto; }
+
+    h1 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .badge { background: #0284c7; color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; font-weight: 600; }
+    .subtitle { font-size: 0.8rem; color: #9ca3af; margin-top: 4px; }
+    
+    .stat-box { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(8px); border: 1px solid rgba(55, 65, 81, 0.8); border-radius: 8px; padding: 10px 16px; margin-top: 8px; }
+    .stat-label { font-size: 0.7rem; color: #9ca3af; text-transform: uppercase; }
+    .stat-val { font-size: 1.2rem; font-weight: 800; font-family: monospace; color: #38bdf8; }
+
+    .btn { background: rgba(31, 41, 55, 0.85); backdrop-filter: blur(8px); color: #f9fafb; border: 1px solid #4b5563; border-radius: 8px; padding: 10px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+    .btn:hover { background: #374151; border-color: #38bdf8; transform: translateY(-2px); }
+    .btn.primary { background: #0284c7; border-color: #38bdf8; }
+    .btn.primary:hover { background: #0369a1; }
+
+    .crosshair { position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; transform: translate(-50%, -50%); border-radius: 50%; background: rgba(56, 189, 248, 0.6); pointer-events: none; }
+    .instructions { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 0.85rem; color: rgba(243, 244, 246, 0.7); background: rgba(17, 24, 39, 0.6); backdrop-filter: blur(6px); padding: 6px 16px; border-radius: 20px; pointer-events: none; }
+  </style>
+  <!-- Three.js and OrbitControls via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+  <div class="crosshair"></div>
+
+  <!-- HUD Overlays -->
+  <div class="hud hud-top-left">
+    <h1>AKASHA: Spatial Resonator <span class="badge">3D WebGL</span></h1>
+    <div class="subtitle">Hamiltonian Physical Sound & Kinetic 3D Arena</div>
+    <div class="stat-box">
+      <div class="stat-label">Total Resonator Energy (H)</div>
+      <div id="hud-energy" class="stat-val">0.000</div>
+    </div>
+  </div>
+
+  <div class="hud hud-top-right">
+    <div class="stat-box">
+      <div class="stat-label">Spatial Resonators Active</div>
+      <div class="stat-val" style="color: #4ade80;">5 Crystals (44.1 kHz 3D)</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-label">Strike Combo / Score</div>
+      <div id="hud-score" class="stat-val" style="color: #c084fc;">0 Hits</div>
+    </div>
+  </div>
+
+  <div class="instructions">Click or Spacebar to launch Kinetic Orbs &bull; Drag to Orbit Camera</div>
+
+  <div class="hud-bottom">
+    <button id="btn-fire" class="btn primary">Launch Kinetic Orb (Click)</button>
+    <button id="btn-strum" class="btn">Strum All Resonators</button>
+    <button id="btn-damping" class="btn">Damping: Normal</button>
+  </div>
+
+  <script>
+    // --- 1. Audio Engine (Spatial 3D Hamiltonian Synthesizers) ---
+    let audioCtx = null;
+    let masterGain = null;
+    let dampingFactor = 0.006;
+    let score = 0;
+
+    const PENTATONIC_FREQS = [130.81, 164.81, 196.00, 261.63, 329.63]; // C3, E3, G3, C4, E4
+    const CRYSTAL_COLORS = [0x38bdf8, 0x818cf8, 0xc084fc, 0xf472b6, 0x4ade80];
+
+    function initAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+      masterGain.connect(audioCtx.destination);
+    }
+
+    class SpatialResonatorSound {
+      constructor(freq, x, y, z) {
+        this.f0 = freq;
+        this.q = 0.0;
+        this.p = 0.0;
+        this.energy = 0.0;
+
+        if (audioCtx) this.setupNodes(x, y, z);
+      }
+
+      setupNodes(x, y, z) {
+        // 3D Spatial PannerNode
+        this.panner = audioCtx.createPanner();
+        this.panner.panningModel = 'HRTF';
+        this.panner.distanceModel = 'inverse';
+        this.panner.refDistance = 10;
+        this.panner.maxDistance = 1000;
+        this.panner.rolloffFactor = 1.2;
+        this.panner.setPosition(x, y, z);
+
+        // ScriptProcessor continuous symplectic solver
+        this.scriptNode = audioCtx.createScriptProcessor(1024, 0, 1);
+        const self = this;
+        const dt = 1.0 / audioCtx.sampleRate;
+        const omega = 2.0 * Math.PI * self.f0;
+        const k = omega * omega;
+
+        this.scriptNode.onaudioprocess = function(e) {
+          const out = e.outputBuffer.getChannelData(0);
+          for (let i = 0; i < 1024; i++) {
+            // Symplectic Leapfrog step at 44.1 kHz
+            const force1 = -(k * self.q + 0.3 * k * (self.q ** 3)) - (2.0 * dampingFactor * omega * self.p);
+            const p_half = self.p + 0.5 * dt * force1;
+            const q_next = self.q + dt * p_half;
+            const force2 = -(k * q_next + 0.3 * k * (q_next ** 3)) - (2.0 * dampingFactor * omega * p_half);
+            const p_next = p_half + 0.5 * dt * force2;
+
+            self.q = q_next;
+            self.p = p_next;
+            out[i] = Math.tanh(self.q * 0.35);
+          }
+          self.energy = 0.5 * (self.p * self.p) / k + 0.5 * (self.q * self.q);
+        };
+
+        this.scriptNode.connect(this.panner);
+        this.panner.connect(masterGain);
+      }
+
+      strike(velocity) {
+        if (!audioCtx) initAudio();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (!this.scriptNode) this.setupNodes(this.x, this.y, this.z);
+
+        const omega = 2.0 * Math.PI * this.f0;
+        this.q += velocity * 0.5;
+        this.p += velocity * omega * 0.8;
+      }
+    }
+
+    // --- 2. Three.js 3D WebGL Scene Setup ---
+    const container = document.getElementById("canvas-container");
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x030712, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 15, 35);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x1e293b, 1.5);
+    scene.add(ambientLight);
+
+    const centerLight = new THREE.PointLight(0x38bdf8, 3, 50);
+    centerLight.position.set(0, 10, 0);
+    scene.add(centerLight);
+
+    // Neon Floor Grid
+    const gridHelper = new THREE.GridHelper(80, 40, 0x1e293b, 0x0f172a);
+    gridHelper.position.y = -5;
+    scene.add(gridHelper);
+
+    // Central Monolith
+    const monolithGeo = new THREE.CylinderGeometry(1.5, 2.5, 12, 8);
+    const monolithMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, metalness: 0.8 });
+    const monolith = new THREE.Mesh(monolithGeo, monolithMat);
+    monolith.position.y = 1;
+    scene.add(monolith);
+
+    // --- 3. Construct 5 Spatial Hamiltonian Crystals ---
+    const crystals = [];
+    const radius = 16;
+
+    for (let i = 0; i < 5; i++) {
+      const angle = (i / 5) * Math.PI * 2;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const y = 3;
+
+      // Visual Crystal Mesh (Octahedron)
+      const geo = new THREE.OctahedronGeometry(2.2, 1);
+      const mat = new THREE.MeshStandardMaterial({
+        color: CRYSTAL_COLORS[i],
+        emissive: CRYSTAL_COLORS[i],
+        emissiveIntensity: 0.3,
+        roughness: 0.1,
+        metalness: 0.9,
+        wireframe: false,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      scene.add(mesh);
+
+      // Outer Glowing Ring
+      const ringGeo = new THREE.RingGeometry(2.8, 3.1, 32);
+      const ringMat = new THREE.MeshBasicMaterial({ color: CRYSTAL_COLORS[i], side: THREE.DoubleSide, transparent: true, opacity: 0.4 });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.set(x, -4.9, z);
+      scene.add(ring);
+
+      // Sound Engine
+      const sound = new SpatialResonatorSound(PENTATONIC_FREQS[i], x, y, z);
+      sound.x = x; sound.y = y; sound.z = z;
+
+      crystals.push({ mesh, ring, sound, baseColor: CRYSTAL_COLORS[i], angle });
+    }
+
+    // --- 4. Kinetic Orbs (Physics Projectiles) ---
+    const kineticOrbs = [];
+    const orbGeo = new THREE.SphereGeometry(0.6, 16, 16);
+
+    function launchOrb() {
+      if (!audioCtx) initAudio();
+      const orbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const orbMesh = new THREE.Mesh(orbGeo, orbMat);
+
+      // Spawn at camera position
+      orbMesh.position.copy(camera.position);
+
+      // Compute trajectory vector toward crosshair (center of screen)
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+      const dir = raycaster.ray.direction.clone().normalize();
+
+      const speed = 42.0;
+      const velocity = dir.multiplyScalar(speed);
+
+      scene.add(orbMesh);
+      kineticOrbs.push({ mesh: orbMesh, velocity, life: 3.5 });
+    }
+
+    // Event listeners for launching
+    window.addEventListener("click", (e) => {
+      // Don't fire if clicking HUD buttons
+      if (e.target.tagName === "BUTTON") return;
+      launchOrb();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space") launchOrb();
+    });
+
+    document.getElementById("btn-fire").addEventListener("click", launchOrb);
+
+    document.getElementById("btn-strum").addEventListener("click", () => {
+      crystals.forEach((c, idx) => {
+        setTimeout(() => { c.sound.strike(1.4); score++; }, idx * 90);
+      });
+    });
+
+    document.getElementById("btn-damping").addEventListener("click", (e) => {
+      if (dampingFactor > 0.001) {
+        dampingFactor = 0.000;
+        e.target.textContent = "Damping: Perpetual Drone";
+        e.target.style.background = "#8b5cf6";
+      } else {
+        dampingFactor = 0.006;
+        e.target.textContent = "Damping: Normal";
+        e.target.style.background = "";
+      }
+    });
+
+    // --- 5. Main Animation & Physics Loop (60 FPS) ---
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.1);
+      controls.update();
+
+      // Update Spatial Audio Listener Position to match 3D Camera!
+      if (audioCtx && audioCtx.listener) {
+        if (audioCtx.listener.positionX) {
+          audioCtx.listener.positionX.setValueAtTime(camera.position.x, audioCtx.currentTime);
+          audioCtx.listener.positionY.setValueAtTime(camera.position.y, audioCtx.currentTime);
+          audioCtx.listener.positionZ.setValueAtTime(camera.position.z, audioCtx.currentTime);
+        } else {
+          audioCtx.listener.setPosition(camera.position.x, camera.position.y, camera.position.z);
+        }
+      }
+
+      // Update Kinetic Orbs & Check Crystal Collisions
+      for (let i = kineticOrbs.length - 1; i >= 0; i--) {
+        const orb = kineticOrbs[i];
+        orb.mesh.position.addScaledVector(orb.velocity, delta);
+        orb.life -= delta;
+
+        // Check collision against all 5 crystals
+        for (let j = 0; j < crystals.length; j++) {
+          const c = crystals[j];
+          const dist = orb.mesh.position.distanceTo(c.mesh.position);
+          if (dist < 3.2) {
+            // Collision! Strike the Hamiltonian resonator physically
+            c.sound.strike(1.6);
+            score++;
+            document.getElementById("hud-score").textContent = `${score} Hits`;
+
+            // Reflect velocity (Hamiltonian momentum rebound)
+            const normal = orb.mesh.position.clone().sub(c.mesh.position).normalize();
+            orb.velocity.reflect(normal).multiplyScalar(0.9);
+            orb.mesh.position.addScaledVector(normal, 0.5);
+
+            // Flash effect
+            c.mesh.material.emissiveIntensity = 2.5;
+            break;
+          }
+        }
+
+        // Cleanup expired orbs
+        if (orb.life <= 0) {
+          scene.remove(orb.mesh);
+          kineticOrbs.splice(i, 1);
+        }
+      }
+
+      // Animate Crystals based on their instantaneous Hamiltonian vibration
+      let totalEnergy = 0.0;
+      crystals.forEach((c) => {
+        // Physical deformation driven by Hamiltonian coordinate q
+        const vib = c.sound.q * 0.4;
+        c.mesh.scale.set(1 + vib, 1 + vib, 1 + vib);
+        c.mesh.rotation.y += 0.01 + Math.abs(vib) * 0.05;
+        c.mesh.rotation.x += 0.005;
+
+        // Decay emissive flash smoothly
+        c.mesh.material.emissiveIntensity = Math.max(0.3, c.mesh.material.emissiveIntensity * 0.95);
+        totalEnergy += c.sound.energy;
+      });
+
+      document.getElementById("hud-energy").textContent = totalEnergy.toFixed(4);
+
+      renderer.render(scene, camera);
+    }
+
+    // Window resize
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+  </script>
+</body>
+</html>
