@@ -35,6 +35,14 @@ The first step towards AKASHA 2's visual predictive architecture: a 2-stage visu
 
 * The model observes the first frame $I_0$, maps it into a 2D Hamiltonian latent manifold $z_0 = [q_0, p_0]$, rolls out 19 timesteps purely through **Symplectic Leapfrog integration**, and decodes each latent point into full $64 \times 64$ frames with zero frame collapse.*
 
+### 🎹 Akasha-Synth: Real-Time Hamiltonian Physical-Modeling Synthesizer
+
+A zero-latency acoustic physical-modeling sound engine running entirely client-side via the **Web Audio API (44.1 kHz)**:
+
+* **Interactive String Pluck:** Click or drag across the virtual vibrating resonator to strike or pluck at variable velocities.
+* **Symplectic Stability:** Employs 2nd-order Symplectic Leapfrog integration at audio sample rate ($44.1\,\text{kHz}$). It can oscillate perpetually (when damping $\gamma = 0$) with bounded Hamiltonian energy without ever clipping or blowing out speakers.
+* **Launch:** Open [`demo/synth.html`](demo/synth.html) directly in any browser.
+
 ### 🔑 Key Scientific Findings
 
 1. **Conservative Systems:** Hamiltonian leapfrog integration strictly bounds energy fluctuations ($|\Delta H|/H_0$), achieving a **+17.0% reduction in energy drift** on the nonlinear pendulum and eliminating runaway tail drift.

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akasha-Synth: Hamiltonian Physical Modeling Synthesizer</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --panel: #131b2e;
+      --border: #232f48;
+      --text: #e2e8f0;
+      --muted: #8493a8;
+      --cyan: #38bdf8;
+      --purple: #c084fc;
+      --green: #4ade80;
+      --amber: #fbbf24;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; }
+    body { background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    header { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    h1 { font-size: 1.35rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .badge { background: #0284c7; color: #fff; font-size: 0.72rem; padding: 3px 8px; border-radius: 12px; font-weight: 600; text-transform: uppercase; }
+    .container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 16px; }
+    .canvas-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; position: relative; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 0.9rem; font-weight: 600; color: #fff; }
+    canvas { background: #060911; border: 1px solid #1a233a; border-radius: 8px; width: 100%; height: 260px; display: block; cursor: crosshair; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 10px; }
+    .control-item { display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; }
+    .control-label { display: flex; justify-content: space-between; color: var(--muted); font-weight: 500; }
+    .control-label span { color: var(--cyan); font-family: monospace; }
+    input[type=range] { accent-color: var(--cyan); height: 5px; border-radius: 4px; }
+    .keys-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    button.key-btn { background: #1e293b; color: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.1s; }
+    button.key-btn:hover { background: #334155; border-color: var(--cyan); }
+    button.key-btn:active, button.key-btn.active { background: var(--cyan); color: #0f172a; transform: translateY(1px); }
+    .btn-power { background: #10b981; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-weight: 600; cursor: pointer; font-size: 0.85rem; }
+    .btn-power.off { background: #ef4444; }
+    .telemetry { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px; }
+    .telem-box { background: #080d1a; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; }
+    .telem-title { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
+    .telem-val { font-size: 1.05rem; font-weight: 700; font-family: monospace; }
+    .tag { display: inline-block; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; background: rgba(56, 189, 248, 0.15); color: var(--cyan); margin-left: 6px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Akasha-Synth <span class="badge">Hamiltonian Sound Engine</span></h1>
+    <div>
+      <button id="btn-audio" class="btn-power">Audio: Enabled</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Interactive String Resonator Canvas -->
+    <div class="canvas-card">
+      <div class="card-header">
+        <span>Vibrating Resonator (Click & Drag across string to Pluck / Strike)</span>
+        <span style="font-size: 0.8rem; color: var(--green);">Web Audio API 44.1 kHz</span>
+      </div>
+      <canvas id="canvas-string" width="960" height="260"></canvas>
+    </div>
+
+    <!-- Controls and Dual Oscilloscope / Phase Space -->
+    <div class="grid-2">
+      <!-- Synthesizer Parameter Controls -->
+      <div class="card">
+        <div class="card-header">
+          <span>Physical Acoustic Controls</span>
+        </div>
+
+        <div class="controls-grid">
+          <div class="control-item">
+            <div class="control-label">Base Pitch (Frequency) <span id="disp-freq">220 Hz</span></div>
+            <input type="range" id="slider-freq" min="80" max="660" step="1" value="220">
+          </div>
+
+          <div class="control-item">
+            <div class="control-label">Sustain / Damping (&gamma;) <span id="disp-damp">0.005</span></div>
+            <input type="range" id="slider-damp" min="0.000" max="0.04" step="0.001" value="0.005">
+          </div>
+
+          <div class="control-item">
+            <div class="control-label">Nonlinear Overtone (&beta;) <span id="disp-nl">0.30</span></div>
+            <input type="range" id="slider-nl" min="0.0" max="1.0" step="0.02" value="0.30">
+          </div>
+
+          <div class="control-item">
+            <div class="control-label">Master Volume <span id="disp-vol">70%</span></div>
+            <input type="range" id="slider-vol" min="0" max="1.0" step="0.05" value="0.7">
+          </div>
+        </div>
+
+        <!-- Musical Note Trigger Buttons -->
+        <div style="margin-top: 16px; font-size: 0.8rem; color: var(--muted); font-weight: 500;">
+          Quick Pluck Pentatonic Notes:
+        </div>
+        <div class="keys-row">
+          <button class="key-btn" data-freq="130.81">C3</button>
+          <button class="key-btn" data-freq="146.83">D3</button>
+          <button class="key-btn" data-freq="164.81">E3</button>
+          <button class="key-btn" data-freq="196.00">G3</button>
+          <button class="key-btn" data-freq="220.00">A3</button>
+          <button class="key-btn" data-freq="261.63">C4</button>
+          <button class="key-btn" data-freq="293.66">D4</button>
+          <button class="key-btn" data-freq="329.63">E4</button>
+          <button class="key-btn" data-freq="392.00">G4</button>
+          <button class="key-btn" data-freq="440.00">A4</button>
+          <button class="key-btn" data-freq="523.25">C5</button>
+        </div>
+      </div>
+
+      <!-- Live Phase Portrait and Sound Wave -->
+      <div class="card">
+        <div class="card-header">
+          <span>Acoustic Phase Portrait & Energy</span>
+          <span class="tag">Symplectic Volume Preserved</span>
+        </div>
+        <canvas id="canvas-phase" width="460" height="200" style="height: 180px;"></canvas>
+
+        <div class="telemetry">
+          <div class="telem-box">
+            <div class="telem-title">Hamiltonian H</div>
+            <div id="tel-energy" class="telem-val" style="color: var(--cyan);">0.000</div>
+          </div>
+          <div class="telem-box">
+            <div class="telem-title">Peak Amplitude</div>
+            <div id="tel-amp" class="telem-val" style="color: var(--purple);">0.000</div>
+          </div>
+          <div class="telem-box">
+            <div class="telem-title">Energy Stability</div>
+            <div class="telem-val" style="color: var(--green);">Bounded</div>
+          </div>
+          <div class="telem-box">
+            <div class="telem-title">Audio Sample Rate</div>
+            <div id="tel-sr" class="telem-val">44.1 kHz</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Audio Context & Hamiltonian Physical Synthesis ---
+    let audioCtx = null;
+    let isAudioActive = false;
+    let masterGainNode = null;
+
+    // Physical Resonator State
+    let f0 = 220.0;
+    let gamma = 0.005; // damping
+    let beta = 0.30;   // nonlinear overtone
+    let masterVol = 0.7;
+
+    // Canonical phase coordinates: position q and momentum p
+    let q = 0.0;
+    let p = 0.0;
+    let energyH = 0.0;
+
+    // Buffer history for rendering
+    const phaseHistory = [];
+    const maxPhasePoints = 300;
+
+    function initAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+
+      masterGainNode = audioCtx.createGain();
+      masterGainNode.gain.setValueAtTime(masterVol, audioCtx.currentTime);
+      masterGainNode.connect(audioCtx.destination);
+
+      // ScriptProcessor for continuous symplectic integration at 44.1 kHz
+      const bufferSize = 1024;
+      const scriptNode = audioCtx.createScriptProcessor(bufferSize, 0, 1);
+
+      scriptNode.onaudioprocess = function(audioProcessingEvent) {
+        const outputBuffer = audioProcessingEvent.outputBuffer;
+        const channelData = outputBuffer.getChannelData(0);
+        const sampleRate = audioCtx.sampleRate;
+        const dt = 1.0 / sampleRate;
+
+        // Angular frequency
+        const omega = 2.0 * Math.PI * f0;
+        const k_linear = omega * omega;
+
+        for (let i = 0; i < bufferSize; i++) {
+          // Hamilton's Equations with Nonlinear Potential V(q) = 0.5 * k * q^2 + 0.25 * beta * q^4
+          // dH/dq = k * q + beta * (omega^2) * q^3
+          // dH/dp = p
+          // Damping: dp/dt = -dH/dq - 2 * gamma * omega * p
+
+          // 2nd-order Symplectic Leapfrog step:
+          // 1. Half step momentum
+          const force1 = -(k_linear * q + beta * k_linear * (q * q * q)) - (2.0 * gamma * omega * p);
+          const p_half = p + 0.5 * dt * force1;
+
+          // 2. Full step position
+          const q_next = q + dt * p_half;
+
+          // 3. Second half step momentum
+          const force2 = -(k_linear * q_next + beta * k_linear * (q_next * q_next * q_next)) - (2.0 * gamma * omega * p_half);
+          const p_next = p_half + 0.5 * dt * force2;
+
+          q = q_next;
+          p = p_next;
+
+          // Output wave sample (scaled acoustic displacement)
+          channelData[i] = Math.tanh(q * 0.4);
+        }
+
+        // Compute instantaneous Hamiltonian energy: H = 0.5 * p^2 + V(q)
+        energyH = 0.5 * (p * p) / k_linear + 0.5 * (q * q);
+      };
+
+      scriptNode.connect(masterGainNode);
+      isAudioActive = true;
+      document.getElementById("tel-sr").textContent = `${(audioCtx.sampleRate / 1000).toFixed(1)} kHz`;
+    }
+
+    function triggerPluck(pluckAmp, frequency) {
+      if (!audioCtx) initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (frequency) {
+        f0 = frequency;
+        document.getElementById("slider-freq").value = f0;
+        document.getElementById("disp-freq").textContent = `${Math.round(f0)} Hz`;
+      }
+      // Impulse momentum strike + initial displacement
+      q += pluckAmp * 0.6;
+      p += pluckAmp * (2.0 * Math.PI * f0) * 0.8;
+    }
+
+    // --- Interactive String Canvas ---
+    const canvasString = document.getElementById("canvas-string");
+    const ctxString = canvasString.getContext("2d");
+    let isPlucking = false;
+
+    function getCanvasCoords(e, canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height),
+      };
+    }
+
+    function handlePluckStart(e) {
+      isPlucking = true;
+      const { y } = getCanvasCoords(e, canvasString);
+      const dy = (canvasString.height / 2 - y) / 40.0;
+      triggerPluck(dy);
+    }
+
+    function handlePluckMove(e) {
+      if (!isPlucking) return;
+      const { y } = getCanvasCoords(e, canvasString);
+      const dy = (canvasString.height / 2 - y) / 40.0;
+      q = dy * 0.7;
+    }
+
+    canvasString.addEventListener("mousedown", handlePluckStart);
+    canvasString.addEventListener("mousemove", handlePluckMove);
+    window.addEventListener("mouseup", () => { isPlucking = false; });
+
+    canvasString.addEventListener("touchstart", (e) => { e.preventDefault(); handlePluckStart(e); });
+    canvasString.addEventListener("touchmove", (e) => { e.preventDefault(); handlePluckMove(e); });
+    window.addEventListener("touchend", () => { isPlucking = false; });
+
+    // --- Phase Portrait Canvas ---
+    const canvasPhase = document.getElementById("canvas-phase");
+    const ctxPhase = canvasPhase.getContext("2d");
+
+    function render() {
+      // 1. Draw String Resonator
+      ctxString.clearRect(0, 0, canvasString.width, canvasString.height);
+      const W = canvasString.width;
+      const H = canvasString.height;
+      const centerY = H / 2;
+
+      // Background grid
+      ctxString.strokeStyle = "#131b2e";
+      ctxString.lineWidth = 1;
+      for (let x = 40; x < W; x += 40) {
+        ctxString.beginPath(); ctxString.moveTo(x, 0); ctxString.lineTo(x, H); ctxString.stroke();
+      }
+
+      // Vibrating String profile: fundamental + standing harmonic wave
+      ctxString.beginPath();
+      ctxString.moveTo(40, centerY);
+
+      const nSegments = 80;
+      const stringLength = W - 80;
+      const amp = q * 35.0;
+
+      for (let i = 0; i <= nSegments; i++) {
+        const xRel = i / nSegments;
+        const x = 40 + xRel * stringLength;
+        // Standing wave profile (spatial mode sin(pi * x))
+        const displacement = amp * Math.sin(Math.PI * xRel) + (amp * 0.25) * Math.sin(2.0 * Math.PI * xRel);
+        ctxString.lineTo(x, centerY - displacement);
+      }
+
+      // Outer glow
+      ctxString.strokeStyle = "rgba(56, 189, 248, 0.2)";
+      ctxString.lineWidth = 12;
+      ctxString.stroke();
+
+      // Main string line
+      ctxString.strokeStyle = "#38bdf8";
+      ctxString.lineWidth = 3;
+      ctxString.stroke();
+
+      // Anchors
+      ctxString.fillStyle = "#64748b";
+      ctxString.beginPath(); ctxString.arc(40, centerY, 6, 0, Math.PI * 2); ctxString.fill();
+      ctxString.beginPath(); ctxString.arc(W - 40, centerY, 6, 0, Math.PI * 2); ctxString.fill();
+
+      // 2. Draw Phase Space (q vs p)
+      ctxPhase.clearRect(0, 0, canvasPhase.width, canvasPhase.height);
+      const pw = canvasPhase.width;
+      const ph = canvasPhase.height;
+      const pcx = pw / 2;
+      const pcy = ph / 2;
+
+      // Axes
+      ctxPhase.strokeStyle = "#1e293b";
+      ctxPhase.lineWidth = 1;
+      ctxPhase.beginPath(); ctxPhase.moveTo(0, pcy); ctxPhase.lineTo(pw, pcy); ctxPhase.stroke();
+      ctxPhase.beginPath(); ctxPhase.moveTo(pcx, 0); ctxPhase.lineTo(pcx, ph); ctxPhase.stroke();
+
+      // Track phase point
+      const scaleQ = 50.0;
+      const normP = p / (2.0 * Math.PI * f0 + 1e-6);
+      const scaleP = 50.0;
+
+      phaseHistory.push([q, normP]);
+      if (phaseHistory.length > maxPhasePoints) phaseHistory.shift();
+
+      if (phaseHistory.length > 2) {
+        ctxPhase.beginPath();
+        ctxPhase.moveTo(pcx + phaseHistory[0][0] * scaleQ, pcy - phaseHistory[0][1] * scaleP);
+        for (let i = 1; i < phaseHistory.length; i++) {
+          ctxPhase.lineTo(pcx + phaseHistory[i][0] * scaleQ, pcy - phaseHistory[i][1] * scaleP);
+        }
+        ctxPhase.strokeStyle = "rgba(192, 132, 252, 0.75)";
+        ctxPhase.lineWidth = 2;
+        ctxPhase.stroke();
+      }
+
+      // Current state point
+      ctxPhase.fillStyle = "#38bdf8";
+      ctxPhase.beginPath();
+      ctxPhase.arc(pcx + q * scaleQ, pcy - normP * scaleP, 4, 0, Math.PI * 2);
+      ctxPhase.fill();
+
+      // Telemetry update
+      document.getElementById("tel-energy").textContent = energyH.toFixed(4);
+      document.getElementById("tel-amp").textContent = Math.abs(q).toFixed(3);
+
+      requestAnimationFrame(render);
+    }
+
+    // --- UI Controls Event Listeners ---
+    document.getElementById("slider-freq").addEventListener("input", (e) => {
+      f0 = parseFloat(e.target.value);
+      document.getElementById("disp-freq").textContent = `${Math.round(f0)} Hz`;
+    });
+
+    document.getElementById("slider-damp").addEventListener("input", (e) => {
+      gamma = parseFloat(e.target.value);
+      document.getElementById("disp-damp").textContent = gamma.toFixed(3);
+    });
+
+    document.getElementById("slider-nl").addEventListener("input", (e) => {
+      beta = parseFloat(e.target.value);
+      document.getElementById("disp-nl").textContent = beta.toFixed(2);
+    });
+
+    document.getElementById("slider-vol").addEventListener("input", (e) => {
+      masterVol = parseFloat(e.target.value);
+      document.getElementById("disp-vol").textContent = `${Math.round(masterVol * 100)}%`;
+      if (masterGainNode) masterGainNode.gain.setValueAtTime(masterVol, audioCtx.currentTime);
+    });
+
+    // Musical note buttons
+    document.querySelectorAll(".key-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const freq = parseFloat(btn.getAttribute("data-freq"));
+        btn.classList.add("active");
+        setTimeout(() => btn.classList.remove("active"), 150);
+        triggerPluck(1.2, freq);
+      });
+    });
+
+    const btnAudio = document.getElementById("btn-audio");
+    btnAudio.addEventListener("click", () => {
+      if (!audioCtx) {
+        initAudio();
+        btnAudio.textContent = "Audio: Running";
+        btnAudio.classList.remove("off");
+      } else if (audioCtx.state === 'running') {
+        audioCtx.suspend();
+        btnAudio.textContent = "Audio: Muted";
+        btnAudio.classList.add("off");
+      } else {
+        audioCtx.resume();
+        btnAudio.textContent = "Audio: Running";
+        btnAudio.classList.remove("off");
+      }
+    });
+
+    // Auto-init audio on first user click anywhere
+    window.addEventListener("click", () => {
+      if (!audioCtx) initAudio();
+    }, { once: true });
+
+    // Start rendering loop
+    requestAnimationFrame(render);
+  </script>
+</body>
+</html>
