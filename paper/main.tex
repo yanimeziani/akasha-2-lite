@@ -124,6 +124,9 @@ Ideal Pendulum & \textbf{Hamiltonian SSM (Ours)} & $0.0010 \pm 0.0003$ & $0.0043
 \midrule
 Harmonic Osc. & Baseline SSM (RK4) & $0.0008 \pm 0.0002$ & $0.0028 \pm 0.0005$ & $0.0101 \pm 0.0023$ & $0.0055 \pm 0.0005$ \\
 Harmonic Osc. & \textbf{Hamiltonian SSM (Ours)} & $0.0023 \pm 0.0021$ & $0.0080 \pm 0.0054$ & $0.0360 \pm 0.0262$ & $0.0092 \pm 0.0022$ \\
+\midrule
+Damped Pendulum & Baseline SSM (RK4) & $\mathbf{0.0001 \pm 0.0000}$ & $\mathbf{0.0001 \pm 0.0001}$ & $\mathbf{0.0001 \pm 0.0001}$ & $0.5639 \pm 0.0052$ \\
+(Dissipative) & \textbf{Hamiltonian SSM (Ours)} & $0.0299 \pm 0.0010$ & $0.1222 \pm 0.0058$ & $0.3523 \pm 0.0377$ & $\mathbf{0.0682 \pm 0.0018}$ \\
 \bottomrule
 \end{tabular}
 }
@@ -143,7 +146,8 @@ Harmonic Osc. & \textbf{Hamiltonian SSM (Ours)} & $0.0023 \pm 0.0021$ & $0.0080 
 Our experimental results yield a clear and scientifically vital insight:
 \begin{enumerate}
     \item \textbf{Symplectic Energy Bounding:} On the nonlinear pendulum, the Hamiltonian leapfrog formulation reduced mean energy drift by \textbf{17.0\%} ($0.0109$ vs $0.0131$). As shown in Figure~\ref{fig:diagnostics} (right), while the unconstrained baseline experiences monotonically growing drift towards $t = 10\,\text{s}$, the Hamiltonian leapfrog integrator bounds energy fluctuations symmetrically around zero.
-    \item \textbf{Phase Lag and Euclidean MSE:} Despite maintaining the closed orbit manifold in phase space (Figure~\ref{fig:diagnostics}, left), the Hamiltonian model exhibits higher point-wise MSE over 200 steps. This divergence is not caused by orbital collapse, but by an infinitesimal period error $\Delta \omega$. Over extended integration ($T = 10\,\text{s}$), $\sin((\omega + \Delta \omega)t)$ drifts out of phase with $\sin(\omega t)$, generating large Euclidean coordinate errors $(q - \hat{q})^2$ even though the system remains geometrically on the true energy hypersurface.
+    \item \textbf{Phase Lag and Euclidean MSE:} Despite maintaining the closed orbit manifold in phase space (Figure~\ref{fig:diagnostics}, left), the Hamiltonian model exhibits higher point-wise MSE over 200 steps on conservative systems. This divergence is not caused by orbital collapse, but by an infinitesimal period error $\Delta \omega$. Over extended integration ($T = 10\,\text{s}$), $\sin((\omega + \Delta \omega)t)$ drifts out of phase with $\sin(\omega t)$, generating Euclidean coordinate errors $(q - \hat{q})^2$ even though the system remains geometrically on the true energy hypersurface.
+    \item \textbf{The Dissipative Failure Mode:} When subjected to the damped pendulum ($\gamma = 0.2$), where mechanical energy physically decays ($dH/dt = -\gamma p^2 \le 0$), the unconstrained baseline easily learns friction and accurately tracks state decay ($\text{MSE} = 0.0001$). In sharp contrast, the Hamiltonian leapfrog integrator strictly enforces Liouville phase-space volume preservation ($\nabla \cdot \dot{x} = 0$). The model refuses to dissipate energy ($|\Delta H|/H_0 = 0.0682$), maintaining perpetual oscillation while the ground truth decays to rest, resulting in severe coordinate error ($\text{MSE} = 0.3523$). This conclusively proves that pure Hamiltonian latent dynamics are strictly limited to conservative manifolds unless augmented with non-conservative dissipation potentials.
 \end{enumerate}
 
 \section{Conclusion and Next Steps}

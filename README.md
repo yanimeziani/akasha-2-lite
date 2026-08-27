@@ -20,14 +20,18 @@ Evaluated across **200 autoregressive steps** ($T = 10.0\,\text{s}$) with **zero
 | **Ideal Pendulum** | **Hamiltonian SSM (Ours)** | $0.0010 \pm 0.0003$ | $0.0043 \pm 0.0016$ | $0.0294 \pm 0.0084$ | **$0.0109 \pm 0.0014$** *(**+17.0%** conservation)* |
 | **Harmonic Oscillator** | Baseline SSM (RK4) | $0.0008 \pm 0.0002$ | $0.0028 \pm 0.0005$ | $0.0101 \pm 0.0023$ | $0.0055 \pm 0.0005$ |
 | **Harmonic Oscillator** | **Hamiltonian SSM (Ours)** | $0.0023 \pm 0.0021$ | $0.0080 \pm 0.0054$ | $0.0360 \pm 0.0262$ | $0.0092 \pm 0.0022$ |
+| **Damped Pendulum** | Baseline SSM (RK4) | **$0.0001 \pm 0.0000$** | **$0.0001 \pm 0.0001$** | **$0.0001 \pm 0.0001$** | $0.5639 \pm 0.0052$ *(Learns dissipation)* |
+| **(Dissipative)** | **Hamiltonian SSM (Ours)** | $0.0299 \pm 0.0010$ | $0.1222 \pm 0.0058$ | $0.3523 \pm 0.0377$ | **$0.0682 \pm 0.0018$** *(Refuses to decay)* |
 
 ### 📈 Phase-Space & Energy Diagnostics
 
 ![AKASHA 2-Lite Rollout Diagnostics](results/phase_portrait_comparison.png)
 
-1. **Symplectic Invariant Manifold:** Both models preserve closed phase portraits ($q$ vs $p$) without numerical explosion.
-2. **Energy Bounding:** Hamiltonian leapfrog integration exhibits bounded symplectic energy fluctuations, eliminating the upward tail drift seen in the unconstrained baseline ($t > 8\,\text{s}$).
-3. **Phase-Shift Trade-Off:** The Hamiltonian model strictly bounds amplitude, but single-step training causes a small phase lag ($\Delta \omega$) that increases Euclidean MSE over long horizons.
+### 🔑 Key Scientific Findings
+
+1. **Conservative Systems:** Hamiltonian leapfrog integration strictly bounds energy fluctuations ($|\Delta H|/H_0$), achieving a **+17.0% reduction in energy drift** on the nonlinear pendulum and eliminating runaway tail drift.
+2. **Phase-Shift Trade-Off:** The Hamiltonian model strictly bounds amplitude, but single-step training causes a small phase lag ($\Delta \omega$) that increases Euclidean MSE over long horizons.
+3. **The Dissipative Failure Mode:** On dissipative systems (damped pendulum), the symplectic inductive bias enforces Liouville phase-space volume conservation ($\nabla \cdot \dot{x} = 0$). The model refuses to decay, while the unconstrained baseline easily captures friction. This confirms that pure Hamiltonian dynamics require non-conservative dissipation potentials (e.g. Rayleigh dissipation) for dissipative environments.
 
 ---
 
@@ -36,13 +40,13 @@ Evaluated across **200 autoregressive steps** ($T = 10.0\,\text{s}$) with **zero
 Requires [`uv`](https://docs.astral.sh/uv/):
 
 ```bash
-# 1. Clone or navigate to the repository
+# 1. Navigate to the repository
 cd Dev/akasha-2-lite
 
 # 2. Run scaffold verification
 uv run python scripts/verify_scaffold.py
 
-# 3. Execute the full multi-seed benchmark
+# 3. Execute the full 3-dataset benchmark across all seeds
 uv run python experiments/run_experiment.py
 
 # 4. Generate phase portrait and rollout comparison plots
@@ -53,6 +57,6 @@ uv run python scripts/plot_rollouts.py
 
 ## 📄 Manuscript
 
-The paper draft is available in LaTeX and PDF:
+The updated paper draft is available in LaTeX and PDF:
 * Source: [`paper/main.tex`](paper/main.tex)
 * Compiled PDF: [`paper/main.pdf`](paper/main.pdf)

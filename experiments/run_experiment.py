@@ -5,7 +5,7 @@ import torch
 import numpy as np
 from typing import Dict, List, Any
 
-from akasha_2_lite.data import IdealPendulum, HarmonicOscillator
+from akasha_2_lite.data import IdealPendulum, HarmonicOscillator, DampedPendulum
 from akasha_2_lite.models import BaselineDynamicalModel, HamiltonianLatentModel
 from akasha_2_lite.training import prepare_transition_loader, train_dynamical_model
 from akasha_2_lite.metrics import compute_rollout_metrics, measure_model_efficiency
@@ -105,6 +105,7 @@ def main():
     systems = [
         ("Ideal Pendulum", IdealPendulum(g=3.0)),
         ("Harmonic Oscillator", HarmonicOscillator(k=2.0)),
+        ("Damped Pendulum (Dissipative)", DampedPendulum(g=3.0, gamma=0.2)),
     ]
     seeds = [42, 43, 44]
 
