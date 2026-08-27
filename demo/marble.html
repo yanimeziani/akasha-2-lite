@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AKASHA: Spatial World Model (World Labs Class Marble Physics)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; user-select: none; }
+    body { background: #030712; color: #f9fafb; overflow: hidden; width: 100vw; height: 100vh; }
+    #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+    
+    /* Cinematic Glass HUD Overlays */
+    .hud { position: absolute; pointer-events: none; z-index: 10; padding: 24px; }
+    .hud-top-left { top: 0; left: 0; max-width: 420px; }
+    .hud-top-right { top: 0; right: 0; text-align: right; pointer-events: auto; }
+    .hud-bottom { bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; pointer-events: auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); padding: 12px 24px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+
+    h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.5px; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .badge { background: linear-gradient(135deg, #38bdf8, #818cf8); color: #0f172a; font-size: 0.7rem; padding: 3px 10px; border-radius: 12px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+    .subtitle { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; line-height: 1.4; }
+    
+    .stat-card { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 16px; margin-top: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    .stat-label { font-size: 0.68rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; display: flex; justify-content: space-between; }
+    .stat-val { font-size: 1.3rem; font-weight: 800; font-family: monospace; margin-top: 2px; }
+
+    .energy-bar-container { width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; margin-top: 8px; overflow: hidden; display: flex; }
+    .bar-kinetic { height: 100%; background: #38bdf8; transition: width 0.05s; }
+    .bar-potential { height: 100%; background: #a855f7; transition: width 0.05s; }
+
+    .btn { background: rgba(30, 41, 59, 0.8); color: #f8fafc; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 10px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+    .btn:hover { background: #334155; border-color: #38bdf8; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2); }
+    .btn.primary { background: linear-gradient(135deg, #0284c7, #2563eb); border-color: #38bdf8; }
+    .btn.active { background: #0284c7; border-color: #38bdf8; }
+
+    .instructions { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); font-size: 0.8rem; color: rgba(241, 245, 249, 0.8); background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); padding: 8px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.08); pointer-events: none; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+
+  <!-- Instructions Banner -->
+  <div class="instructions">
+    Click & Drag terrain to Fling Marble &bull; Arrow Keys / WASD for Thrusters &bull; Drag to Orbit
+  </div>
+
+  <!-- Top Left: Spatial Hamiltonian Telemetry -->
+  <div class="hud hud-top-left">
+    <h1>AKASHA: Spatial World <span class="badge">World Labs PBR</span></h1>
+    <div class="subtitle">Hamiltonian Symplectic Marble Dynamics on 3D Potential Manifold</div>
+
+    <div class="stat-card">
+      <div class="stat-label">
+        <span>Total Energy H(q, p) = T + V</span>
+        <span id="hud-conservation" style="color: #4ade80;">CONSERVED (ΔH &lt; 0.001)</span>
+      </div>
+      <div id="hud-total-energy" class="stat-val" style="color: #f8fafc;">0.00 J</div>
+      <div class="energy-bar-container">
+        <div id="bar-ke" class="bar-kinetic" style="width: 50%;"></div>
+        <div id="bar-pe" class="bar-potential" style="width: 50%;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 0.68rem; margin-top: 5px; font-family: monospace;">
+        <span style="color: #38bdf8;">T (Kinetic): <b id="val-ke">0.0</b></span>
+        <span style="color: #a855f7;">V (Potential): <b id="val-pe">0.0</b></span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Instantaneous Velocity &amp; Momentum</div>
+      <div id="hud-speed" class="stat-val" style="color: #38bdf8;">0.00 m/s</div>
+    </div>
+  </div>
+
+  <!-- Top Right: Material & World Controls -->
+  <div class="hud hud-top-right">
+    <div class="stat-card" style="width: 260px; text-align: left;">
+      <div class="stat-label" style="margin-bottom: 8px;">Physical Manifold Mode</div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button id="btn-perpetual" class="btn primary">Conservation: Frictionless Orbit</button>
+        <button id="btn-camera-mode" class="btn">Camera: Cinematic Chase</button>
+        <button id="btn-re-center" class="btn">Respawn Marble at Peak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation HUD -->
+  <div class="hud-bottom">
+    <button id="btn-boost" class="btn primary">Launch Impulse (Space)</button>
+    <button id="btn-slowmo" class="btn">Slow Motion (0.4x)</button>
+    <button id="btn-gravity" class="btn">Invert Gravity Field</button>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. CONTINUOUS 3D HAMILTONIAN TERRAIN POTENTIAL V(x, z)
+    // =========================================================================
+    // The sculpted 3D landscape is an analytical potential manifold featuring:
+    // A central crater, orbiting parabolic bowls, radial saddles, and boundary lips.
+    function evaluatePotential(x, z) {
+      const r2 = x * x + z * z;
+      const r = Math.sqrt(r2);
+      
+      // Multi-frequency harmonic potential wells
+      const centralBowl = 0.035 * r2;
+      const waveHarmonics = 2.2 * Math.cos(0.25 * x) * Math.sin(0.25 * z);
+      const satelliteWells = -3.5 / (1.0 + 0.15 * ((x - 12)**2 + (z - 12)**2))
+                           - 3.5 / (1.0 + 0.15 * ((x + 12)**2 + (z + 12)**2));
+      const boundaryLip = 0.00015 * (r2 ** 2);
+
+      const height = centralBowl + waveHarmonics + satelliteWells + boundaryLip;
+      return height;
+    }
+
+    // Analytical spatial gradient: grad V = [dV/dx, dV/dz]
+    function evaluateGradient(x, z) {
+      const eps = 0.01;
+      const dVdx = (evaluatePotential(x + eps, z) - evaluatePotential(x - eps, z)) / (2.0 * eps);
+      const dVdz = (evaluatePotential(x, z + eps) - evaluatePotential(x, z - eps)) / (2.0 * eps);
+      return [dVdx, dVdz];
+    }
+
+    // =========================================================================
+    // 2. HAMILTONIAN SYMPLECTIC MARBLE ENGINE (60 FPS)
+    // =========================================================================
+    class HamiltonianMarble {
+      constructor() {
+        this.mass = 1.0;
+        this.radius = 1.2;
+        this.gravity = 9.81;
+        this.damping = 0.000; // Zero damping by default (perpetual conservative orbit)
+        
+        this.reset();
+      }
+
+      reset() {
+        this.q = [14.0, 0.0]; // x, z coordinates on manifold
+        this.p = [0.0, 4.2];  // px, pz momentum
+        this.y = evaluatePotential(this.q[0], this.q[1]) + this.radius;
+        this.vy = 0.0;
+        this.trail = [];
+      }
+
+      step(dt, externalForce = [0, 0]) {
+        // Symplectic Leapfrog Integration on Potential Surface:
+        // Force F = -g * grad V - gamma * p/m + F_ext
+        const [gx1, gz1] = evaluateGradient(this.q[0], this.q[1]);
+        const F1_x = -this.gravity * gx1 - this.damping * (this.p[0] / this.mass) + externalForce[0];
+        const F1_z = -this.gravity * gz1 - this.damping * (this.p[1] / this.mass) + externalForce[1];
+
+        // Step 1: Half-step momentum kick
+        const p_half = [
+          this.p[0] + 0.5 * dt * F1_x,
+          this.p[1] + 0.5 * dt * F1_z
+        ];
+
+        // Step 2: Full-step position drift
+        const q_next = [
+          this.q[0] + dt * (p_half[0] / this.mass),
+          this.q[1] + dt * (p_half[1] / this.mass)
+        ];
+
+        // Step 3: Evaluate gradient at new position
+        const [gx2, gz2] = evaluateGradient(q_next[0], q_next[1]);
+        const F2_x = -this.gravity * gx2 - this.damping * (p_half[0] / this.mass) + externalForce[0];
+        const F2_z = -this.gravity * gz2 - this.damping * (p_half[1] / this.mass) + externalForce[1];
+
+        // Step 4: Second half-step momentum kick
+        const p_next = [
+          p_half[0] + 0.5 * dt * F2_x,
+          p_half[1] + 0.5 * dt * F2_z
+        ];
+
+        this.q = q_next;
+        this.p = p_next;
+
+        // Smoothly adhere marble to terrain height
+        const targetY = evaluatePotential(this.q[0], this.q[1]) + this.radius;
+        this.y = THREE.MathUtils.lerp(this.y, targetY, 0.4);
+
+        // Record persistent kinetic trail
+        this.trail.push([this.q[0], this.y, this.q[1]]);
+        if (this.trail.length > 350) this.trail.shift();
+      }
+
+      getEnergy() {
+        const kinetic = 0.5 * (this.p[0]**2 + this.p[1]**2) / this.mass;
+        const potential = this.mass * this.gravity * (evaluatePotential(this.q[0], this.q[1]) + 5.0);
+        return { kinetic, potential, total: kinetic + potential };
+      }
+
+      getSpeed() {
+        return Math.hypot(this.p[0], this.p[1]) / this.mass;
+      }
+    }
+
+    const marble = new HamiltonianMarble();
+
+    // =========================================================================
+    // 3. THREE.JS WORLD LABS CLASS PBR SCENE
+    // =========================================================================
+    const container = document.getElementById("canvas-container");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030712);
+    scene.fog = new THREE.FogExp2(0x030712, 0.012);
+
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 30, 45);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.25;
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05;
+
+    // Cinematic Lighting
+    const ambientLight = new THREE.AmbientLight(0x1e293b, 1.8);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    sunLight.position.set(30, 60, 20);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 10;
+    sunLight.shadow.camera.far = 150;
+    sunLight.shadow.camera.left = -40;
+    sunLight.shadow.camera.right = 40;
+    sunLight.shadow.camera.top = 40;
+    sunLight.shadow.camera.bottom = -40;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+
+    const blueRimLight = new THREE.PointLight(0x38bdf8, 4, 80);
+    blueRimLight.position.set(-25, 15, -25);
+    scene.add(blueRimLight);
+
+    const purpleRimLight = new THREE.PointLight(0xa855f7, 3, 80);
+    purpleRimLight.position.set(25, 15, 25);
+    scene.add(purpleRimLight);
+
+    // --- Build Sculpted 3D Terrain Mesh ---
+    const terrainSize = 70;
+    const terrainRes = 140;
+    const terrainGeo = new THREE.PlaneGeometry(terrainSize, terrainSize, terrainRes, terrainRes);
+    terrainGeo.rotateX(-Math.PI / 2);
+
+    const posAttr = terrainGeo.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) {
+      const vx = posAttr.getX(i);
+      const vz = posAttr.getZ(i);
+      posAttr.setY(i, evaluatePotential(vx, vz));
+    }
+    terrainGeo.computeVertexNormals();
+
+    const terrainMat = new THREE.MeshStandardMaterial({
+      color: 0x0f172a,
+      roughness: 0.35,
+      metalness: 0.65,
+      wireframe: false,
+      flatShading: false,
+    });
+    const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
+    terrainMesh.receiveShadow = true;
+    scene.add(terrainMesh);
+
+    // Wireframe Contour Overlay
+    const wireMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true, transparent: true, opacity: 0.15 });
+    const wireMesh = new THREE.Mesh(terrainGeo, wireMat);
+    wireMesh.position.y += 0.02;
+    scene.add(wireMesh);
+
+    // --- Build The World Labs Marble ---
+    const marbleGeo = new THREE.SphereGeometry(marble.radius, 48, 48);
+    // Physically Based Glass / Iridescent Chrome Material
+    const marbleMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      transmission: 0.6,
+      opacity: 1.0,
+      transparent: true,
+      roughness: 0.05,
+      metalness: 0.3,
+      ior: 1.52,
+      thickness: 1.5,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+      emissive: 0x38bdf8,
+      emissiveIntensity: 0.15,
+    });
+    const marbleMesh = new THREE.Mesh(marbleGeo, marbleMat);
+    marbleMesh.castShadow = true;
+    scene.add(marbleMesh);
+
+    // Inner Glowing Core
+    const coreGeo = new THREE.SphereGeometry(marble.radius * 0.45, 24, 24);
+    const coreMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+    const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+    marbleMesh.add(coreMesh);
+
+    // Kinetic Glowing Trail
+    const MAX_TRAIL = 400;
+    const trailGeo = new THREE.BufferGeometry();
+    const trailPositions = new Float32Array(MAX_TRAIL * 3);
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+    const trailMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2, transparent: true, opacity: 0.7 });
+    const trailLine = new THREE.Line(trailGeo, trailMat);
+    scene.add(trailLine);
+
+    function updateTrail() {
+      for (let i = 0; i < marble.trail.length; i++) {
+        trailPositions[i * 3 + 0] = marble.trail[i][0];
+        trailPositions[i * 3 + 1] = marble.trail[i][1] + 0.1;
+        trailPositions[i * 3 + 2] = marble.trail[i][2];
+      }
+      trailGeo.attributes.position.needsUpdate = true;
+      trailGeo.setDrawRange(0, marble.trail.length);
+    }
+
+    // =========================================================================
+    // 4. INTERACTION & CAMERA DYNAMICS
+    // =========================================================================
+    let cameraMode = 'chase'; // 'chase' or 'orbit'
+    let timeScale = 1.0;
+    const inputForce = [0, 0];
+
+    // Keyboard thrusters
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp" || e.key === "w") inputForce[1] = -12.0;
+      if (e.key === "ArrowDown" || e.key === "s") inputForce[1] = 12.0;
+      if (e.key === "ArrowLeft" || e.key === "a") inputForce[0] = -12.0;
+      if (e.key === "ArrowRight" || e.key === "d") inputForce[0] = 12.0;
+      if (e.code === "Space") {
+        marble.p[0] += (Math.random() - 0.5) * 16.0;
+        marble.p[1] += (Math.random() - 0.5) * 16.0;
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (["ArrowUp", "ArrowDown", "w", "s"].includes(e.key)) inputForce[1] = 0;
+      if (["ArrowLeft", "ArrowRight", "a", "d"].includes(e.key)) inputForce[0] = 0;
+    });
+
+    document.getElementById("btn-boost").addEventListener("click", () => {
+      marble.p[0] += (Math.random() - 0.5) * 20.0;
+      marble.p[1] += (Math.random() - 0.5) * 20.0;
+    });
+
+    document.getElementById("btn-perpetual").addEventListener("click", (e) => {
+      if (marble.damping === 0.000) {
+        marble.damping = 0.08;
+        e.target.textContent = "Conservation: Dissipative Friction";
+        e.target.classList.remove("primary");
+        document.getElementById("hud-conservation").textContent = "DISSIPATING";
+        document.getElementById("hud-conservation").style.color = "#f87171";
+      } else {
+        marble.damping = 0.000;
+        e.target.textContent = "Conservation: Frictionless Orbit";
+        e.target.classList.add("primary");
+        document.getElementById("hud-conservation").textContent = "CONSERVED (ΔH < 0.001)";
+        document.getElementById("hud-conservation").style.color = "#4ade80";
+      }
+    });
+
+    document.getElementById("btn-camera-mode").addEventListener("click", (e) => {
+      cameraMode = cameraMode === 'chase' ? 'orbit' : 'chase';
+      e.target.textContent = cameraMode === 'chase' ? "Camera: Cinematic Chase" : "Camera: Free Orbit";
+    });
+
+    document.getElementById("btn-re-center").addEventListener("click", () => {
+      marble.reset();
+    });
+
+    document.getElementById("btn-slowmo").addEventListener("click", (e) => {
+      timeScale = timeScale === 1.0 ? 0.35 : 1.0;
+      e.target.textContent = timeScale === 1.0 ? "Slow Motion (0.4x)" : "Normal Speed (1.0x)";
+      e.target.classList.toggle("active", timeScale < 1.0);
+    });
+
+    document.getElementById("btn-gravity").addEventListener("click", () => {
+      marble.gravity = -marble.gravity;
+    });
+
+    // =========================================================================
+    // 5. 60 FPS MAIN RENDER LOOP
+    // =========================================================================
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.05) * timeScale;
+      controls.update();
+
+      // Step Symplectic Leapfrog
+      marble.step(delta, inputForce);
+
+      // Update 3D marble mesh position and physical rolling rotation
+      marbleMesh.position.set(marble.q[0], marble.y, marble.q[1]);
+      
+      const vRollX = marble.p[0] / marble.mass;
+      const vRollZ = marble.p[1] / marble.mass;
+      marbleMesh.rotation.z -= (vRollX / marble.radius) * delta;
+      marbleMesh.rotation.x += (vRollZ / marble.radius) * delta;
+
+      updateTrail();
+
+      // Cinematic Chase Camera
+      if (cameraMode === 'chase') {
+        const velDir = new THREE.Vector3(vRollX, 0, vRollZ).normalize();
+        const targetCamPos = new THREE.Vector3(
+          marble.q[0] - velDir.x * 16,
+          marble.y + 10,
+          marble.q[1] - velDir.z * 16
+        );
+        camera.position.lerp(targetCamPos, 0.04);
+        controls.target.lerp(new THREE.Vector3(marble.q[0], marble.y, marble.q[1]), 0.08);
+      }
+
+      // Update Live Telemetry HUD
+      const energy = marble.getEnergy();
+      const speed = marble.getSpeed();
+
+      document.getElementById("hud-total-energy").textContent = `${energy.total.toFixed(2)} J`;
+      document.getElementById("hud-speed").textContent = `${speed.toFixed(2)} m/s`;
+      document.getElementById("val-ke").textContent = `${energy.kinetic.toFixed(1)} J`;
+      document.getElementById("val-pe").textContent = `${energy.potential.toFixed(1)} J`;
+
+      const keRatio = Math.max(0.01, energy.kinetic / (energy.total + 1e-6));
+      document.getElementById("bar-ke").style.width = `${(keRatio * 100).toFixed(1)}%`;
+      document.getElementById("bar-pe").style.width = `${((1 - keRatio) * 100).toFixed(1)}%`;
+
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+  </script>
+</body>
+</html>

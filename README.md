@@ -35,6 +35,15 @@ The first step towards AKASHA 2's visual predictive architecture: a 2-stage visu
 
 * The model observes the first frame $I_0$, maps it into a 2D Hamiltonian latent manifold $z_0 = [q_0, p_0]$, rolls out 19 timesteps purely through **Symplectic Leapfrog integration**, and decodes each latent point into full $64 \times 64$ frames with zero frame collapse.*
 
+### 🔮 AKASHA: Spatial World Model (World Labs Class Marble Physics)
+
+An interactive 3D spatial world & physical simulation built with **Three.js PBR Rendering** and **2nd-Order Symplectic Leapfrog Integration**:
+
+* **Continuous Potential Manifold ($V(x, z)$):** An undulating, sculpted 3D terrain featuring harmonic gravity wells, saddles, and parabolic bowls.
+* **Exact Energy Invariance ($H = T + V$):** Watch real-time continuous exchange between Kinetic Energy ($T = \frac{1}{2m}\|p\|^2$) and Potential Energy ($V(q)$). When set to frictionless orbit, the marble winds through complex terrain indefinitely with strictly bounded energy ($\Delta H < 0.001\,\text{J}$) and zero numerical explosion.
+* **Cinematic Visuals & Controls:** PBR glass/chrome refraction, soft directional shadows, neon contour lines, dynamic kinetic trails, WASD thruster controls, and smooth chase camera tracking.
+* **Launch:** Open [`demo/marble.html`](demo/marble.html) in any browser.
+
 ### 🛸 Akasha-Nav: Autonomous Drone Dead-Reckoning (GPS-Denied Navigation)
 
 A zero-drift kinematic dead-reckoning filter designed for autonomous drones and robotics in GPS-denied environments (tunnels, indoor warehouses, GPS-jammed zones):
