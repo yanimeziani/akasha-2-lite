@@ -421,7 +421,7 @@
     scene.add(warmLight);
 
     // --- ARENA ARCHITECTURE & PHOTOREAL PBR MATERIALS ---
-    const arenaSize = 80;
+    const arenaSize = 160;
 
     // 1. Polished Epoxy Concrete Floor with Clearcoat Specular Sheen
     const floorGeo = new THREE.PlaneGeometry(arenaSize, arenaSize);
@@ -449,7 +449,7 @@
 
     // Central Precision Helipad (H) with Glowing Inset LEDs
     const helipadMesh = new THREE.Mesh(
-      new THREE.RingGeometry(3.6, 4.2, 48),
+      new THREE.RingGeometry(4.5, 5.2, 48),
       new THREE.MeshBasicMaterial({ color: 0x4ade80, side: THREE.DoubleSide })
     );
     helipadMesh.rotation.x = -Math.PI / 2;
@@ -457,7 +457,7 @@
     scene.add(helipadMesh);
 
     // 2. Perimeter Structural Walls with Architectural Dark Metal Ribs
-    const wallHeight = 18;
+    const wallHeight = 22;
     const wallMat = new THREE.MeshStandardMaterial({
       color: 0x080e1a,
       roughness: 0.6,
@@ -473,7 +473,7 @@
 
       // Upper glowing industrial LED ribbon
       const ribbon = new THREE.Mesh(
-        new THREE.BoxGeometry(arenaSize, 0.25, 1.5),
+        new THREE.BoxGeometry(arenaSize, 0.35, 1.5),
         new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
       );
       ribbon.position.set(x, wallHeight - 1.2, z);
@@ -486,13 +486,13 @@
     buildWall(arenaSize / 2, 0, Math.PI / 2);
 
     // 3. Structural Heavy Duty Carbon Columns with Warning Lights
-    const columnGeo = new THREE.CylinderGeometry(0.85, 0.95, wallHeight, 24);
+    const columnGeo = new THREE.CylinderGeometry(1.2, 1.4, wallHeight, 24);
     const columnMat = new THREE.MeshStandardMaterial({
       color: 0x111827,
       roughness: 0.25,
       metalness: 0.85,
     });
-    const colCoords = [[-24, -24], [24, -24], [-24, 24], [24, 24], [-24, 0], [24, 0], [0, -24], [0, 24]];
+    const colCoords = [[-48, -48], [48, -48], [-48, 48], [48, 48], [-48, 0], [48, 0], [0, -48], [0, 48]];
     colCoords.forEach(c => {
       const col = new THREE.Mesh(columnGeo, columnMat);
       col.position.set(c[0], wallHeight / 2, c[1]);
@@ -501,26 +501,26 @@
       scene.add(col);
 
       // Warning Strobe Beacon on top
-      const beacon = new THREE.PointLight(0xef4444, 1.2, 18);
+      const beacon = new THREE.PointLight(0xef4444, 1.5, 25);
       beacon.position.set(c[0], wallHeight + 0.2, c[1]);
       scene.add(beacon);
     });
 
     // 4. Perimeter High-Bay Overhead Lighting Gantry Trusses
     const trussMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.9, roughness: 0.2 });
-    for (let z = -24; z <= 24; z += 24) {
-      const truss = new THREE.Mesh(new THREE.BoxGeometry(arenaSize, 0.8, 0.8), trussMat);
+    for (let z = -48; z <= 48; z += 32) {
+      const truss = new THREE.Mesh(new THREE.BoxGeometry(arenaSize, 1.0, 1.0), trussMat);
       truss.position.set(0, wallHeight - 2.0, z);
       scene.add(truss);
 
       // Fluorescent downlights along truss
-      for (let x = -28; x <= 28; x += 14) {
-        const fixture = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.2, 0.4), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-        fixture.position.set(x, wallHeight - 2.4, z);
+      for (let x = -56; x <= 56; x += 28) {
+        const fixture = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.3, 0.5), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        fixture.position.set(x, wallHeight - 2.5, z);
         scene.add(fixture);
 
-        const downlight = new THREE.SpotLight(0xffffff, 2.2, 28, Math.PI / 5, 0.6, 1.2);
-        downlight.position.set(x, wallHeight - 2.5, z);
+        const downlight = new THREE.SpotLight(0xffffff, 2.5, 40, Math.PI / 5, 0.6, 1.2);
+        downlight.position.set(x, wallHeight - 2.6, z);
         downlight.target.position.set(x, 0, z);
         scene.add(downlight);
         scene.add(downlight.target);
@@ -674,18 +674,18 @@
 
       const cx = radarCanvas.width / 2;
       const cy = radarCanvas.height / 2;
-      const scale = 1.95;
+      const scale = (radarCanvas.width - 24) / arenaSize;
 
       rctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
       rctx.lineWidth = 1;
       rctx.strokeRect(cx - (arenaSize/2)*scale, cy - (arenaSize/2)*scale, arenaSize*scale, arenaSize*scale);
 
-      [15, 30].forEach(r => {
+      [30, 60].forEach(r => {
         rctx.beginPath(); rctx.arc(cx, cy, r * scale, 0, Math.PI * 2); rctx.stroke();
       });
 
       function drawTrail(path, color) {
-        if (path.length < 2) return;
+        if (!path || path.length < 2) return;
         rctx.strokeStyle = color;
         rctx.lineWidth = 1.4;
         rctx.beginPath();
@@ -697,14 +697,31 @@
         rctx.stroke();
       }
 
-      drawTrail(engine.pathGT, "rgba(74, 222, 128, 0.65)");
-      drawTrail(engine.pathNaive, "rgba(239, 68, 68, 0.75)");
-      drawTrail(engine.pathAkasha, "rgba(56, 189, 248, 0.95)");
+      if (isEurocMode && eurocData) {
+        const escale = 1.4;
+        const eGT = eurocData.ground_truth.slice(0, eurocIdx).map(p => [p[0]*escale, p[2]*escale, p[1]*escale]);
+        const eNV = eurocData.naive.slice(0, eurocIdx).map(p => [p[0]*escale, p[2]*escale, p[1]*escale]);
+        const eAK = eurocData.akasha.slice(0, eurocIdx).map(p => [p[0]*escale, p[2]*escale, p[1]*escale]);
 
-      const dx = cx + engine.q_akasha[0] * scale;
-      const dy = cy + engine.q_akasha[2] * scale;
-      rctx.fillStyle = "#38bdf8";
-      rctx.beginPath(); rctx.arc(dx, dy, 3.5, 0, Math.PI * 2); rctx.fill();
+        drawTrail(eGT, "rgba(74, 222, 128, 0.65)");
+        drawTrail(eNV, "rgba(239, 68, 68, 0.75)");
+        drawTrail(eAK, "rgba(56, 189, 248, 0.95)");
+
+        const curAK = eurocData.akasha[eurocIdx];
+        const dx = cx + curAK[0] * escale * scale;
+        const dy = cy + curAK[1] * escale * scale;
+        rctx.fillStyle = "#38bdf8";
+        rctx.beginPath(); rctx.arc(dx, dy, 4.0, 0, Math.PI * 2); rctx.fill();
+      } else {
+        drawTrail(engine.pathGT, "rgba(74, 222, 128, 0.65)");
+        drawTrail(engine.pathNaive, "rgba(239, 68, 68, 0.75)");
+        drawTrail(engine.pathAkasha, "rgba(56, 189, 248, 0.95)");
+
+        const dx = cx + engine.q_akasha[0] * scale;
+        const dy = cy + engine.q_akasha[2] * scale;
+        rctx.fillStyle = "#38bdf8";
+        rctx.beginPath(); rctx.arc(dx, dy, 4.0, 0, Math.PI * 2); rctx.fill();
+      }
     }
 
     const phaseCvs = document.getElementById("phase-canvas");
@@ -865,18 +882,19 @@
           const nv = eurocData.naive[eurocIdx];
           const ak = eurocData.akasha[eurocIdx];
 
-          droneGroup.position.set(ak[0]*4.0, ak[2]*4.0, ak[1]*4.0);
+          const escale = 1.5;
+          droneGroup.position.set(ak[0]*escale, ak[2]*escale + 0.5, ak[1]*escale);
 
-          const subGT = eurocData.ground_truth.slice(0, eurocIdx).map(p => [p[0]*4.0, p[2]*4.0, p[1]*4.0]);
-          const subNV = eurocData.naive.slice(0, eurocIdx).map(p => [p[0]*4.0, p[2]*4.0, p[1]*4.0]);
-          const subAK = eurocData.akasha.slice(0, eurocIdx).map(p => [p[0]*4.0, p[2]*4.0, p[1]*4.0]);
+          const subGT = eurocData.ground_truth.slice(0, eurocIdx).map(p => [p[0]*escale, p[2]*escale + 0.5, p[1]*escale]);
+          const subNV = eurocData.naive.slice(0, eurocIdx).map(p => [p[0]*escale, p[2]*escale + 0.5, p[1]*escale]);
+          const subAK = eurocData.akasha.slice(0, eurocIdx).map(p => [p[0]*escale, p[2]*escale + 0.5, p[1]*escale]);
 
           updateLineBuffers(gtGeo, gtPosArr, subGT.slice(-MAX_POINTS));
           updateLineBuffers(naiveGeo, naivePosArr, subNV.slice(-MAX_POINTS));
           updateLineBuffers(akGeo, akPosArr, subAK.slice(-MAX_POINTS));
 
           if (cameraMode === 'follow') {
-            camera.position.lerp(new THREE.Vector3(ak[0]*4.0 - 15, ak[2]*4.0 + 9, ak[1]*4.0 + 15), 0.06);
+            camera.position.lerp(new THREE.Vector3(ak[0]*escale - 12, ak[2]*escale + 7, ak[1]*escale + 12), 0.06);
             controls.target.copy(droneGroup.position);
           }
 
