@@ -27,6 +27,14 @@ Evaluated across **200 autoregressive steps** ($T = 10.0\,\text{s}$) with **zero
 
 ![AKASHA 2-Lite Rollout Diagnostics](results/phase_portrait_comparison.png)
 
+### 🎬 Visual World Model (64×64 Pixel Latent Rollout)
+
+The first step towards AKASHA 2's visual predictive architecture: a 2-stage visual world model ($I_t \to z_t \to \hat{z}_{t+1} \to \hat{I}_{t+1}$) trained on commodity Apple Silicon MPS in **under 20 seconds**:
+
+![AKASHA 2-Lite Visual Latent Rollout](results/visual_world_model_rollout.png)
+
+* The model observes the first frame $I_0$, maps it into a 2D Hamiltonian latent manifold $z_0 = [q_0, p_0]$, rolls out 19 timesteps purely through **Symplectic Leapfrog integration**, and decodes each latent point into full $64 \times 64$ frames with zero frame collapse.*
+
 ### 🔑 Key Scientific Findings
 
 1. **Conservative Systems:** Hamiltonian leapfrog integration strictly bounds energy fluctuations ($|\Delta H|/H_0$), achieving a **+17.0% reduction in energy drift** on the nonlinear pendulum and eliminating runaway tail drift.
