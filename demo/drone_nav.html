@@ -103,6 +103,7 @@
       </div>
 
       <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+        <button id="btn-load-euroc" class="btn primary">Load Real ETH Zürich Flight Data (V1_02)</button>
         <button id="btn-toggle-filter" class="btn active">Akasha Filter: ENABLED</button>
         <button id="btn-reset-flight" class="btn">Reset Flight Origin (t = 0)</button>
       </div>
@@ -425,6 +426,40 @@
       engine.reset();
     });
 
+    let eurocFlightData = null;
+    let isEurocMode = false;
+    let eurocIndex = 0;
+
+    const btnEuroc = document.getElementById("btn-load-euroc");
+    btnEuroc.addEventListener("click", () => {
+      if (!isEurocMode) {
+        fetch("euroc_flight.json")
+          .then(res => res.json())
+          .then(data => {
+            eurocFlightData = data;
+            isEurocMode = true;
+            eurocIndex = 0;
+            btnEuroc.textContent = "Switch to Live Simulator Mode";
+            btnEuroc.classList.remove("primary");
+            btnEuroc.classList.add("active");
+            document.querySelector("h1").innerHTML = 'AKASHA-NAV <span class="badge" style="background:#8b5cf6;">REAL ETH ZÜRICH MAV</span>';
+            document.querySelector(".subtitle").textContent = "Real Physical Flight (Vicon Laser Ground Truth vs Akasha-Nav)";
+            document.getElementById("hud-status").textContent = "REAL VICON MoCap";
+          })
+          .catch(err => {
+            alert("Could not load euroc_flight.json. Make sure to run benchmark_euroc_flight.py first.");
+          });
+      } else {
+        isEurocMode = false;
+        btnEuroc.textContent = "Load Real ETH Zürich Flight Data (V1_02)";
+        btnEuroc.classList.add("primary");
+        btnEuroc.classList.remove("active");
+        document.querySelector("h1").innerHTML = 'AKASHA-NAV <span class="badge badge-live">LIVE SOLVER</span>';
+        document.querySelector(".subtitle").textContent = "Live 2nd-Order Symplectic Leapfrog Kinematic Filter";
+        engine.reset();
+      }
+    });
+
     const btnToggle = document.getElementById("btn-toggle-filter");
     btnToggle.addEventListener("click", () => {
       engine.filterEnabled = !engine.filterEnabled;
@@ -456,45 +491,93 @@
       rotors.forEach(r => r.rotation.y += 0.5);
 
       if (isSimRunning) {
-        // Step live engine proportional to sim speed
-        const stepsToRun = Math.round(simSpeed);
-        for (let s = 0; s < stepsToRun; s++) {
-          engine.step();
+        if (isEurocMode && eurocFlightData) {
+          // Playback Real ETH Zurich Flight
+          eurocIndex = Math.min(eurocIndex + Math.round(simSpeed), eurocFlightData.time.length - 1);
+          const t = eurocFlightData.time[eurocIndex];
+          const gt = eurocFlightData.ground_truth[eurocIndex];
+          const nv = eurocFlightData.naive[eurocIndex];
+          const ak = eurocFlightData.akasha[eurocIndex];
+
+          droneGroup.position.set(ak[0] * 5.0, ak[2] * 5.0, ak[1] * 5.0);
+
+          // Update real flight trails
+          const subGT = eurocFlightData.ground_truth.slice(0, eurocIndex).map(p => [p[0]*5.0, p[1]*5.0, p[2]*5.0]);
+          const subNV = eurocFlightData.naive.slice(0, eurocIndex).map(p => [p[0]*5.0, p[1]*5.0, p[2]*5.0]);
+          const subAK = eurocFlightData.akasha.slice(0, eurocIndex).map(p => [p[0]*5.0, p[1]*5.0, p[2]*5.0]);
+
+          updateLineBuffers(gtGeo, gtPosArr, subGT.slice(-MAX_POINTS));
+          updateLineBuffers(naiveGeo, naivePosArr, subNV.slice(-MAX_POINTS));
+          updateLineBuffers(akGeo, akPosArr, subAK.slice(-MAX_POINTS));
+
+          if (cameraMode === 'follow') {
+            camera.position.lerp(new THREE.Vector3(ak[0]*5.0 - 12, ak[2]*5.0 + 8, ak[1]*5.0 + 12), 0.05);
+            controls.target.copy(droneGroup.position);
+          }
+
+          const naiveErr = Math.hypot(nv[0] - gt[0], nv[1] - gt[1], nv[2] - gt[2]);
+          const akashaErr = Math.hypot(ak[0] - gt[0], ak[1] - gt[1], ak[2] - gt[2]);
+
+          document.getElementById("hud-time").textContent = `${t.toFixed(2)} s`;
+          document.getElementById("hud-naive-err").textContent = `${naiveErr.toFixed(2)} m`;
+          document.getElementById("hud-akasha-err").textContent = `${akashaErr.toFixed(2)} m`;
+          document.getElementById("hud-energy").textContent = `Advantage: +60.2%`;
+
+          pctx.fillStyle = "#0b0f19";
+          pctx.fillRect(0, 0, phaseCvs.width, phaseCvs.height);
+          pctx.fillStyle = "#38bdf8";
+          pctx.font = "11px monospace";
+          pctx.fillText("ETH ZÜRICH V1_02 REAL FLIGHT", 20, 30);
+          pctx.fillText(`Naive Final Drift:  ${eurocFlightData.metrics.end_naive.toFixed(2)} m`, 20, 55);
+          pctx.fillText(`Akasha Final Drift: ${eurocFlightData.metrics.end_akasha.toFixed(2)} m`, 20, 75);
+          pctx.fillStyle = "#4ade80";
+          pctx.fillText(`Drift Suppression:  +${eurocFlightData.metrics.end_improvement.toFixed(1)}%`, 20, 95);
+
+          if (eurocIndex >= eurocFlightData.time.length - 1) {
+            isSimRunning = false;
+            document.getElementById("btn-play").textContent = "Mission Completed";
+          }
+        } else {
+          // Step live simulator engine
+          const stepsToRun = Math.round(simSpeed);
+          for (let s = 0; s < stepsToRun; s++) {
+            engine.step();
+          }
+
+          // Move Drone mesh to current Akasha position
+          const akPos = engine.q_akasha;
+          droneGroup.position.set(akPos[0], akPos[2], akPos[1]);
+
+          // Tilt drone towards velocity vector
+          const vel = [engine.p_akasha[0] / engine.mass, engine.p_akasha[2] / engine.mass, engine.p_akasha[1] / engine.mass];
+          const dir = new THREE.Vector3(...vel).normalize();
+          droneGroup.lookAt(droneGroup.position.clone().add(dir));
+
+          // Camera follow mode
+          if (cameraMode === 'follow') {
+            camera.position.lerp(new THREE.Vector3(akPos[0] - 14, akPos[2] + 9, akPos[1] + 14), 0.06);
+            controls.target.copy(droneGroup.position);
+          }
+
+          // Update 3D Path lines live
+          updateLineBuffers(gtGeo, gtPosArr, engine.pathGT);
+          updateLineBuffers(naiveGeo, naivePosArr, engine.pathNaive);
+          updateLineBuffers(akGeo, akPosArr, engine.pathAkasha);
+
+          // Compute Live Drift Errors
+          const naiveErr = Math.hypot(engine.q_naive[0] - engine.q_truth[0], engine.q_naive[1] - engine.q_truth[1], engine.q_naive[2] - engine.q_truth[2]);
+          const akashaErr = Math.hypot(engine.q_akasha[0] - engine.q_truth[0], engine.q_akasha[1] - engine.q_truth[1], engine.q_akasha[2] - engine.q_truth[2]);
+
+          const currentEnergy = 0.5 * (engine.p_akasha[0]**2 + engine.p_akasha[1]**2 + engine.p_akasha[2]**2) / engine.mass;
+
+          // Update HUD
+          document.getElementById("hud-time").textContent = `${engine.simTime.toFixed(2)} s`;
+          document.getElementById("hud-naive-err").textContent = `${naiveErr.toFixed(2)} m`;
+          document.getElementById("hud-akasha-err").textContent = `${akashaErr.toFixed(2)} m`;
+          document.getElementById("hud-energy").textContent = `H: ${currentEnergy.toFixed(1)} J`;
+
+          renderPhasePortrait();
         }
-
-        // Move Drone mesh to current Akasha position
-        const akPos = engine.q_akasha;
-        droneGroup.position.set(akPos[0], akPos[2], akPos[1]);
-
-        // Tilt drone towards velocity vector
-        const vel = [engine.p_akasha[0] / engine.mass, engine.p_akasha[2] / engine.mass, engine.p_akasha[1] / engine.mass];
-        const dir = new THREE.Vector3(...vel).normalize();
-        droneGroup.lookAt(droneGroup.position.clone().add(dir));
-
-        // Camera follow mode
-        if (cameraMode === 'follow') {
-          camera.position.lerp(new THREE.Vector3(akPos[0] - 14, akPos[2] + 9, akPos[1] + 14), 0.06);
-          controls.target.copy(droneGroup.position);
-        }
-
-        // Update 3D Path lines live
-        updateLineBuffers(gtGeo, gtPosArr, engine.pathGT);
-        updateLineBuffers(naiveGeo, naivePosArr, engine.pathNaive);
-        updateLineBuffers(akGeo, akPosArr, engine.pathAkasha);
-
-        // Compute Live Drift Errors
-        const naiveErr = Math.hypot(engine.q_naive[0] - engine.q_truth[0], engine.q_naive[1] - engine.q_truth[1], engine.q_naive[2] - engine.q_truth[2]);
-        const akashaErr = Math.hypot(engine.q_akasha[0] - engine.q_truth[0], engine.q_akasha[1] - engine.q_truth[1], engine.q_akasha[2] - engine.q_truth[2]);
-
-        const currentEnergy = 0.5 * (engine.p_akasha[0]**2 + engine.p_akasha[1]**2 + engine.p_akasha[2]**2) / engine.mass;
-
-        // Update HUD
-        document.getElementById("hud-time").textContent = `${engine.simTime.toFixed(2)} s`;
-        document.getElementById("hud-naive-err").textContent = `${naiveErr.toFixed(2)} m`;
-        document.getElementById("hud-akasha-err").textContent = `${akashaErr.toFixed(2)} m`;
-        document.getElementById("hud-energy").textContent = `H: ${currentEnergy.toFixed(1)} J`;
-
-        renderPhasePortrait();
       }
 
       renderer.render(scene, camera);

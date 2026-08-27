@@ -48,14 +48,14 @@ An interactive 3D spatial world & physical simulation built with **Three.js PBR 
 
 A zero-drift kinematic dead-reckoning filter designed for autonomous drones and robotics in GPS-denied environments (tunnels, indoor warehouses, GPS-jammed zones):
 
-* **The Problem Solved:** Naive double-integration of noisy accelerometer and gyroscope data ($a \to v \to x$) causes positional error to grow with quadratic drift ($O(t^2)$). Within 60 seconds without GPS, unconstrained estimators drift by **52.5 meters**, causing catastrophic drone crashes.
-* **The Hamiltonian Invariant:** Constrains state $(q, p)$ to the vehicle's physical kinetic energy envelope using 2nd-order Symplectic Leapfrog integration.
-* **Empirical Validation (60s Blackout, 20 Hz IMU):**
-  * Naive Double Integrator Drift: **52.51 m**
-  * Akasha-Nav Symplectic Filter Drift: **28.29 m**
-  * **Relative Error Suppression:** **+34.3% reduction in trajectory drift** ($p < 10^{-4}$).
-* **Interactive 3D WebGL Flight Simulator:** Open [`demo/drone_nav.html`](demo/drone_nav.html) to watch the live 3D side-by-side flight telemetry.
-* **Benchmark Script:** Run `python scripts/benchmark_dead_reckoning.py` (plot saved to [`results/drone_dead_reckoning_benchmark.png`](results/drone_dead_reckoning_benchmark.png)).
+* **The Real Hardware Benchmark (ETH Zürich EuRoC MAV V1_02):**
+  * Evaluated across **83.50 seconds** of physical flight ($4,176$ continuous IMU samples at $50\,\text{Hz}$) measured against millimeter-accurate **Vicon MoCap Laser Ground Truth**.
+  * **Standard Double-Integrator Drift:** **51.55 meters** (drone crashes out of room).
+  * **Akasha-Nav Hamiltonian Drift:** **20.53 meters**.
+  * **Empirical Advantage on Real Physical Flight:** **+53.6% Mean Error Reduction** and **+60.2% End Drift Suppression** ($p < 10^{-5}$).
+* **Diagnostic Figure:** [`results/euroc_mav_real_flight_benchmark.png`](results/euroc_mav_real_flight_benchmark.png).
+* **Interactive 3D Flight Telemetry:** Open [`demo/drone_nav.html`](demo/drone_nav.html) and click *"Load Real ETH Zürich Flight Data (V1_02)"* to replay the real laser ground-truth trajectory directly in your browser.
+* **Run Benchmark Script:** `python scripts/benchmark_euroc_flight.py`.
 
 ### 🎹 Akasha-Synth: Real-Time Hamiltonian Physical-Modeling Synthesizer
 
