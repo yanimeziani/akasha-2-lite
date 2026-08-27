@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AKASHA 2-Lite: Real-Time Neural Physics Demo</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent-gt: #f0f6fc;
+      --accent-base: #f0883e;
+      --accent-ham: #58a6ff;
+      --accent-green: #3fb950;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; }
+    body { background: var(--bg); color: var(--text); padding: 16px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    header { width: 100%; max-width: 1100px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    h1 { font-size: 1.25rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .badge { background: #238636; color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 600; text-transform: uppercase; }
+    .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 1100px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; position: relative; }
+    .card-title { font-size: 0.9rem; font-weight: 600; color: #fff; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    canvas { background: #090d13; border: 1px solid #21262d; border-radius: 6px; width: 100%; height: 360px; display: block; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    .controls-panel { width: 100%; max-width: 1100px; margin-top: 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; }
+    .btn-group { display: flex; gap: 8px; align-items: center; }
+    button { background: #21262d; color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.15s ease; }
+    button:hover { background: #30363d; color: #fff; border-color: #8b949e; }
+    button.primary { background: #238636; border-color: #2ea043; color: #fff; }
+    button.primary:hover { background: #2ea043; }
+    .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 1100px; margin-top: 16px; }
+    .metric-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; }
+    .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .metric-value { font-size: 1.1rem; font-weight: 700; font-family: monospace; }
+    .legend { display: flex; gap: 14px; font-size: 0.8rem; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-color { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .range-wrap { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+    input[type=range] { accent-color: var(--accent-ham); }
+  </style>
+  <script src="weights.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>AKASHA 2-Lite: Real-Time Dynamic Inference <span class="badge">Client-Side 60 FPS</span></h1>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-color" style="background: var(--accent-gt);"></span> Ground Truth (ODE)</div>
+      <div class="legend-item"><span class="legend-color" style="background: var(--accent-base);"></span> Baseline SSM (RK4)</div>
+      <div class="legend-item"><span class="legend-color" style="background: var(--accent-ham);"></span> Hamiltonian SSM (Leapfrog)</div>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- Pendulum World Canvas -->
+    <div class="card">
+      <div class="card-title">
+        <span>Physical Space (Drag bob to initialize)</span>
+        <span id="fps-counter" style="color: var(--accent-green); font-size: 0.8rem;">60 FPS</span>
+      </div>
+      <canvas id="canvas-physics" width="500" height="360"></canvas>
+    </div>
+
+    <!-- Phase Space Canvas -->
+    <div class="card">
+      <div class="card-title">
+        <span>Phase Space Manifold (q vs p)</span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Position vs Momentum</span>
+      </div>
+      <canvas id="canvas-phase" width="500" height="360"></canvas>
+    </div>
+  </div>
+
+  <!-- Controls Panel -->
+  <div class="controls-panel">
+    <div class="btn-group">
+      <button id="btn-toggle-play" class="primary">Pause</button>
+      <button id="btn-reset">Reset (q0 = 1.0)</button>
+      <button id="btn-kick">+Kick (Add Momentum)</button>
+    </div>
+
+    <div class="range-wrap">
+      <label for="slider-gamma">Friction / Damping (&gamma;):</label>
+      <input type="range" id="slider-gamma" min="0" max="0.5" step="0.02" value="0.0">
+      <span id="val-gamma" style="min-width: 32px; font-family: monospace;">0.00</span>
+    </div>
+
+    <div class="range-wrap">
+      <label for="slider-speed">Sim Speed:</label>
+      <input type="range" id="slider-speed" min="0.2" max="2.0" step="0.1" value="1.0">
+      <span id="val-speed" style="min-width: 32px; font-family: monospace;">1.0x</span>
+    </div>
+  </div>
+
+  <!-- Real-time Metrics Dashboard -->
+  <div class="metrics-row">
+    <div class="metric-box">
+      <div class="metric-label">Rollout Horizon (t)</div>
+      <div id="m-time" class="metric-value">0.00 s (Step 0)</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">Hamiltonian Energy (H)</div>
+      <div id="m-energy" class="metric-value" style="color: var(--accent-ham);">0.000</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">Baseline Energy Drift</div>
+      <div id="m-base-drift" class="metric-value" style="color: var(--accent-base);">0.00%</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">Hamiltonian Energy Drift</div>
+      <div id="m-ham-drift" class="metric-value" style="color: var(--accent-ham);">0.00%</div>
+    </div>
+  </div>
+
+  <script>
+    // --- Model Inference & Physical Constants ---
+    const g = 3.0;
+    let dt = 0.05;
+    let gamma = 0.0;
+    let speedMult = 1.0;
+    let isPlaying = true;
+
+    // States: [q, p]
+    let stateGT = [1.0, 0.0];
+    let stateBase = [1.0, 0.0];
+    let stateHam = [1.0, 0.0];
+    let h0 = 0.0;
+    let simSteps = 0;
+
+    // History trails for Phase space
+    const maxTrail = 400;
+    const trailGT = [];
+    const trailBase = [];
+    const trailHam = [];
+
+    // Neural Network forward engines
+    const W = window.AKASHA_WEIGHTS;
+
+    function mlpForward(layers, x) {
+      // 3-layer MLP: Linear -> Tanh -> Linear -> Tanh -> Linear
+      let h = x;
+      for (let l = 0; l < layers.length; l++) {
+        const outDim = layers[l].b.length;
+        const inDim = h.length;
+        const nextH = new Float32Array(outDim);
+        const weights = layers[l].w;
+        const bias = layers[l].b;
+
+        for (let i = 0; i < outDim; i++) {
+          let sum = bias[i];
+          const row = weights[i];
+          for (let j = 0; j < inDim; j++) {
+            sum += row[j] * h[j];
+          }
+          nextH[i] = (l < layers.length - 1) ? Math.tanh(sum) : sum;
+        }
+        h = nextH;
+      }
+      return h;
+    }
+
+    // Baseline RK4 step
+    function baselineStep(state, deltaT) {
+      function deriv(s) {
+        return mlpForward(W.baseline, s);
+      }
+      const k1 = deriv(state);
+      const k2 = deriv([state[0] + 0.5 * deltaT * k1[0], state[1] + 0.5 * deltaT * k1[1]]);
+      const k3 = deriv([state[0] + 0.5 * deltaT * k2[0], state[1] + 0.5 * deltaT * k2[1]]);
+      const k4 = deriv([state[0] + deltaT * k3[0], state[1] + deltaT * k3[1]]);
+      return [
+        state[0] + (deltaT / 6.0) * (k1[0] + 2*k2[0] + 2*k3[0] + k4[0]),
+        state[1] + (deltaT / 6.0) * (k1[1] + 2*k2[1] + 2*k3[1] + k4[1])
+      ];
+    }
+
+    // Hamiltonian Autograd (Exact Analytical Backprop through MLP)
+    function hamiltonianGradients(q, p) {
+      const layers = W.hamiltonian;
+      // Layer 0: [2] -> [128]
+      const z0 = new Float32Array(128);
+      const h0 = new Float32Array(128);
+      const w0 = layers[0].w, b0 = layers[0].b;
+      for (let i = 0; i < 128; i++) {
+        z0[i] = w0[i][0] * q + w0[i][1] * p + b0[i];
+        h0[i] = Math.tanh(z0[i]);
+      }
+
+      // Layer 1: [128] -> [128]
+      const z1 = new Float32Array(128);
+      const h1 = new Float32Array(128);
+      const w1 = layers[1].w, b1 = layers[1].b;
+      for (let i = 0; i < 128; i++) {
+        let sum = b1[i];
+        const row = w1[i];
+        for (let j = 0; j < 128; j++) sum += row[j] * h0[j];
+        z1[i] = sum;
+        h1[i] = Math.tanh(sum);
+      }
+
+      // Layer 2: [128] -> [1] (H)
+      const w2 = layers[2].w[0], b2 = layers[2].b[0];
+      let energy = b2;
+      for (let j = 0; j < 128; j++) energy += w2[j] * h1[j];
+
+      // Backward pass:
+      // dH/dh1 = w2
+      const dH_dz1 = new Float32Array(128);
+      for (let i = 0; i < 128; i++) {
+        dH_dz1[i] = w2[i] * (1.0 - h1[i] * h1[i]);
+      }
+
+      // dH/dh0 = W1^T * dH_dz1
+      const dH_dz0 = new Float32Array(128);
+      for (let j = 0; j < 128; j++) {
+        let sum = 0.0;
+        for (let i = 0; i < 128; i++) {
+          sum += w1[i][j] * dH_dz1[i];
+        }
+        dH_dz0[j] = sum * (1.0 - h0[j] * h0[j]);
+      }
+
+      // dH/dx = W0^T * dH_dz0
+      let dH_dq = 0.0, dH_dp = 0.0;
+      for (let i = 0; i < 128; i++) {
+        dH_dq += w0[i][0] * dH_dz0[i];
+        dH_dp += w0[i][1] * dH_dz0[i];
+      }
+
+      return { dH_dq, dH_dp, energy };
+    }
+
+    // Hamiltonian Leapfrog Step
+    function hamiltonianStep(state, deltaT) {
+      const q = state[0];
+      const p = state[1];
+
+      // 1. Half step momentum
+      const g1 = hamiltonianGradients(q, p);
+      const p_half = p - 0.5 * deltaT * g1.dH_dq;
+
+      // 2. Full step position
+      const g2 = hamiltonianGradients(q, p_half);
+      const q_next = q + deltaT * g2.dH_dp;
+
+      // 3. Second half step momentum
+      const g3 = hamiltonianGradients(q_next, p_half);
+      const p_next = p_half - 0.5 * deltaT * g3.dH_dq;
+
+      return [q_next, p_next];
+    }
+
+    // Ground Truth ODE Step (RK4)
+    function groundTruthStep(state, deltaT, damping) {
+      function deriv(q, p) {
+        return [p, -g * Math.sin(q) - damping * p];
+      }
+      const [k1q, k1p] = deriv(state[0], state[1]);
+      const [k2q, k2p] = deriv(state[0] + 0.5 * deltaT * k1q, state[1] + 0.5 * deltaT * k1p);
+      const [k3q, k3p] = deriv(state[0] + 0.5 * deltaT * k2q, state[1] + 0.5 * deltaT * k2p);
+      const [k4q, k4p] = deriv(state[0] + deltaT * k3q, state[1] + deltaT * k3p);
+
+      return [
+        state[0] + (deltaT / 6.0) * (k1q + 2*k2q + 2*k3q + k4q),
+        state[1] + (deltaT / 6.0) * (k1p + 2*k2p + 2*k3p + k4p)
+      ];
+    }
+
+    function calcEnergy(q, p) {
+      return 0.5 * p * p + g * (1.0 - Math.cos(q));
+    }
+
+    function resetSimulation(newQ0, newP0) {
+      stateGT = [newQ0, newP0];
+      stateBase = [newQ0, newP0];
+      stateHam = [newQ0, newP0];
+      h0 = calcEnergy(newQ0, newP0);
+      simSteps = 0;
+      trailGT.length = 0;
+      trailBase.length = 0;
+      trailHam.length = 0;
+    }
+
+    // --- Canvas Rendering ---
+    const canvasPhys = document.getElementById("canvas-physics");
+    const ctxPhys = canvasPhys.getContext("2d");
+    const canvasPhase = document.getElementById("canvas-phase");
+    const ctxPhase = canvasPhase.getContext("2d");
+
+    const L = 140; // visual pendulum length in px
+    const originX = 250;
+    const originY = 130;
+
+    let isDragging = false;
+
+    canvasPhys.addEventListener("mousedown", (e) => {
+      const rect = canvasPhys.getBoundingClientRect();
+      const x = e.clientX - rect.left - originX;
+      const y = e.clientY - rect.top - originY;
+      const angle = Math.atan2(x, y);
+      isDragging = true;
+      resetSimulation(angle, 0.0);
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      const rect = canvasPhys.getBoundingClientRect();
+      const x = e.clientX - rect.left - originX;
+      const y = e.clientY - rect.top - originY;
+      const angle = Math.atan2(x, y);
+      resetSimulation(angle, 0.0);
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+
+    function drawPendulumArm(ctx, q, color, isDashed = false, bobRadius = 10) {
+      const x = originX + L * Math.sin(q);
+      const y = originY + L * Math.cos(q);
+
+      ctx.beginPath();
+      ctx.moveTo(originX, originY);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = isDashed ? 2 : 3;
+      if (isDashed) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(x, y, bobRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    function renderPhysics() {
+      ctxPhys.clearRect(0, 0, canvasPhys.width, canvasPhys.height);
+
+      // Pivot mount
+      ctxPhys.fillStyle = "#30363d";
+      ctxPhys.beginPath();
+      ctxPhys.arc(originX, originY, 6, 0, 2 * Math.PI);
+      ctxPhys.fill();
+
+      // Draw Ground Truth
+      drawPendulumArm(ctxPhys, stateGT[0], "rgba(240, 246, 252, 0.5)", true, 7);
+      // Draw Baseline SSM
+      drawPendulumArm(ctxPhys, stateBase[0], "rgba(240, 136, 62, 0.8)", false, 9);
+      // Draw Hamiltonian SSM
+      drawPendulumArm(ctxPhys, stateHam[0], "rgba(88, 166, 255, 0.9)", false, 10);
+    }
+
+    function renderPhaseSpace() {
+      ctxPhase.clearRect(0, 0, canvasPhase.width, canvasPhase.height);
+      const cx = canvasPhase.width / 2;
+      const cy = canvasPhase.height / 2;
+      const scaleQ = 80;
+      const scaleP = 60;
+
+      // Axes
+      ctxPhase.strokeStyle = "#21262d";
+      ctxPhase.lineWidth = 1;
+      ctxPhase.setLineDash([]);
+      ctxPhase.beginPath();
+      ctxPhase.moveTo(0, cy); ctxPhase.lineTo(canvasPhase.width, cy);
+      ctxPhase.moveTo(cx, 0); ctxPhase.lineTo(cx, canvasPhase.height);
+      ctxPhase.stroke();
+
+      function drawTrail(trail, color, isDashed = false) {
+        if (trail.length < 2) return;
+        ctxPhase.beginPath();
+        ctxPhase.moveTo(cx + trail[0][0] * scaleQ, cy - trail[0][1] * scaleP);
+        for (let i = 1; i < trail.length; i++) {
+          ctxPhase.lineTo(cx + trail[i][0] * scaleQ, cy - trail[i][1] * scaleP);
+        }
+        ctxPhase.strokeStyle = color;
+        ctxPhase.lineWidth = isDashed ? 1.5 : 2;
+        if (isDashed) ctxPhase.setLineDash([4, 4]); else ctxPhase.setLineDash([]);
+        ctxPhase.stroke();
+      }
+
+      drawTrail(trailGT, "rgba(240, 246, 252, 0.4)", true);
+      drawTrail(trailBase, "rgba(240, 136, 62, 0.7)");
+      drawTrail(trailHam, "rgba(88, 166, 255, 0.85)");
+
+      // Draw current points
+      function drawHead(state, color) {
+        ctxPhase.beginPath();
+        ctxPhase.arc(cx + state[0] * scaleQ, cy - state[1] * scaleP, 4, 0, 2 * Math.PI);
+        ctxPhase.fillStyle = color;
+        ctxPhase.fill();
+      }
+      drawHead(stateGT, "#f0f6fc");
+      drawHead(stateBase, "#f0883e");
+      drawHead(stateHam, "#58a6ff");
+    }
+
+    // Main animation loop
+    let lastTime = performance.now();
+    let frameCount = 0;
+    let fpsTimer = 0;
+
+    function step() {
+      if (isPlaying && !isDragging) {
+        const effDt = dt * speedMult;
+        stateGT = groundTruthStep(stateGT, effDt, gamma);
+        stateBase = baselineStep(stateBase, effDt);
+        stateHam = hamiltonianStep(stateHam, effDt);
+
+        simSteps++;
+        trailGT.push([...stateGT]);
+        trailBase.push([...stateBase]);
+        trailHam.push([...stateHam]);
+
+        if (trailGT.length > maxTrail) {
+          trailGT.shift();
+          trailBase.shift();
+          trailHam.shift();
+        }
+
+        // Update metrics
+        const currentH = calcEnergy(stateHam[0], stateHam[1]);
+        const baseH = calcEnergy(stateBase[0], stateBase[1]);
+        const eps = 1e-6;
+        const driftHam = Math.abs(currentH - h0) / (Math.abs(h0) + eps) * 100;
+        const driftBase = Math.abs(baseH - h0) / (Math.abs(h0) + eps) * 100;
+
+        document.getElementById("m-time").textContent = `${(simSteps * dt).toFixed(2)} s (Step ${simSteps})`;
+        document.getElementById("m-energy").textContent = currentH.toFixed(4);
+        document.getElementById("m-base-drift").textContent = `${driftBase.toFixed(2)}%`;
+        document.getElementById("m-ham-drift").textContent = `${driftHam.toFixed(2)}%`;
+      }
+
+      renderPhysics();
+      renderPhaseSpace();
+
+      // FPS tracking
+      const now = performance.now();
+      frameCount++;
+      if (now - fpsTimer >= 1000) {
+        document.getElementById("fps-counter").textContent = `${frameCount} FPS`;
+        frameCount = 0;
+        fpsTimer = now;
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    // Controls
+    document.getElementById("btn-toggle-play").addEventListener("click", () => {
+      isPlaying = !isPlaying;
+      document.getElementById("btn-toggle-play").textContent = isPlaying ? "Pause" : "Resume";
+    });
+
+    document.getElementById("btn-reset").addEventListener("click", () => {
+      resetSimulation(1.0, 0.0);
+    });
+
+    document.getElementById("btn-kick").addEventListener("click", () => {
+      stateGT[1] += 0.8;
+      stateBase[1] += 0.8;
+      stateHam[1] += 0.8;
+      h0 = calcEnergy(stateHam[0], stateHam[1]);
+    });
+
+    document.getElementById("slider-gamma").addEventListener("input", (e) => {
+      gamma = parseFloat(e.target.value);
+      document.getElementById("val-gamma").textContent = gamma.toFixed(2);
+    });
+
+    document.getElementById("slider-speed").addEventListener("input", (e) => {
+      speedMult = parseFloat(e.target.value);
+      document.getElementById("val-speed").textContent = `${speedMult.toFixed(1)}x`;
+    });
+
+    // Initialize
+    resetSimulation(1.0, 0.0);
+    requestAnimationFrame(step);
+  </script>
+</body>
+</html>
