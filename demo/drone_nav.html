@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AKASHA-NAV: Autonomous Drone Dead-Reckoning (3D GPS-Denied Telemetry)</title>
+  <title>AKASHA-NAV: Real-Time Hamiltonian Symplectic Kinematic Engine</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; user-select: none; }
     body { background: #030712; color: #f9fafb; overflow: hidden; width: 100vw; height: 100vh; }
@@ -11,18 +11,19 @@
     
     /* HUD Overlays */
     .hud { position: absolute; pointer-events: none; z-index: 10; padding: 20px; }
-    .hud-top-left { top: 0; left: 0; }
-    .hud-top-right { top: 0; right: 0; text-align: right; }
+    .hud-top-left { top: 0; left: 0; max-width: 380px; }
+    .hud-top-right { top: 0; right: 0; text-align: right; pointer-events: auto; }
     .hud-bottom { bottom: 25px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; pointer-events: auto; background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(10px); padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(75, 85, 99, 0.8); }
 
-    h1 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .badge { background: #ef4444; color: #fff; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; text-transform: uppercase; font-weight: 700; animation: pulse 2s infinite; }
+    h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .badge { background: #0284c7; color: #fff; font-size: 0.7rem; padding: 3px 8px; border-radius: 12px; text-transform: uppercase; font-weight: 700; }
+    .badge-live { background: #10b981; animation: pulse 2s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .subtitle { font-size: 0.8rem; color: #9ca3af; margin-top: 4px; }
+    .subtitle { font-size: 0.75rem; color: #9ca3af; margin-top: 4px; }
     
-    .stat-box { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(8px); border: 1px solid rgba(55, 65, 81, 0.9); border-radius: 8px; padding: 10px 16px; margin-top: 8px; min-width: 220px; }
-    .stat-label { font-size: 0.7rem; color: #9ca3af; text-transform: uppercase; }
-    .stat-val { font-size: 1.3rem; font-weight: 800; font-family: monospace; }
+    .stat-box { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(55, 65, 81, 0.9); border-radius: 8px; padding: 10px 14px; margin-top: 8px; }
+    .stat-label { font-size: 0.68rem; color: #9ca3af; text-transform: uppercase; display: flex; justify-content: space-between; }
+    .stat-val { font-size: 1.25rem; font-weight: 800; font-family: monospace; }
 
     .val-naive { color: #f87171; }
     .val-akasha { color: #38bdf8; }
@@ -31,10 +32,14 @@
     .btn { background: #1f2937; color: #f9fafb; border: 1px solid #4b5563; border-radius: 6px; padding: 8px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
     .btn:hover { background: #374151; border-color: #38bdf8; }
     .btn.active { background: #0284c7; border-color: #38bdf8; }
+    .btn.danger { background: #dc2626; border-color: #f87171; }
 
-    .legend { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 0.75rem; text-align: left; }
-    .legend-item { display: flex; align-items: center; gap: 8px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .control-row { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
+    .slider-label { font-size: 0.7rem; color: #9ca3af; display: flex; justify-content: space-between; }
+    input[type=range] { width: 100%; accent-color: #38bdf8; cursor: pointer; }
+
+    /* Phase Portrait Canvas inside HUD */
+    #phase-canvas { width: 100%; height: 110px; background: #0b0f19; border: 1px solid #374151; border-radius: 6px; margin-top: 6px; display: block; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -43,100 +48,247 @@
 
   <div id="canvas-container"></div>
 
-  <!-- Top Left HUD -->
+  <!-- Top Left HUD: Real-Time Telemetry -->
   <div class="hud hud-top-left">
-    <h1>AKASHA-NAV <span class="badge">GPS BLACKOUT (60s)</span></h1>
-    <div class="subtitle">Autonomous 3D Drone Dead-Reckoning Telemetry</div>
+    <h1>AKASHA-NAV <span class="badge badge-live">LIVE SOLVER</span></h1>
+    <div class="subtitle">Live 2nd-Order Symplectic Leapfrog Kinematic Filter</div>
 
     <div class="stat-box">
-      <div class="stat-label">Mission Flight Time</div>
-      <div id="hud-time" class="stat-val">0.0 s</div>
+      <div class="stat-label">
+        <span>Active GPS Blackout Time</span>
+        <span id="hud-status" style="color: #4ade80;">TRACKING</span>
+      </div>
+      <div id="hud-time" class="stat-val">0.00 s</div>
     </div>
 
     <div class="stat-box">
-      <div class="stat-label">Akasha-Nav Drift Error (Ours)</div>
+      <div class="stat-label">Akasha Drift (Hamiltonian Bound)</div>
       <div id="hud-akasha-err" class="stat-val val-akasha">0.00 m</div>
     </div>
 
     <div class="stat-box">
-      <div class="stat-label">Naive Double-Integrator Drift</div>
+      <div class="stat-label">Naive Double-Integrator Drift (Red)</div>
       <div id="hud-naive-err" class="stat-val val-naive">0.00 m</div>
     </div>
 
+    <!-- Live Phase Space Canvas -->
     <div class="stat-box">
-      <div class="stat-label">Error Suppression Advantage</div>
-      <div id="hud-advantage" class="stat-val" style="color: #a855f7;">+34.3% Bounded</div>
+      <div class="stat-label">
+        <span>Hamiltonian Phase Space (q_x vs p_x)</span>
+        <span id="hud-energy" style="color: #c084fc;">H: 0.00 J</span>
+      </div>
+      <canvas id="phase-canvas" width="340" height="110"></canvas>
     </div>
   </div>
 
-  <!-- Top Right HUD -->
+  <!-- Top Right HUD: Live Physics & Sensor Injection Controls -->
   <div class="hud hud-top-right">
-    <div class="stat-box">
-      <div class="stat-label">Flight Trajectory Legend</div>
-      <div class="legend">
-        <div class="legend-item"><div class="dot" style="background: #4ade80;"></div> Ground Truth Corridor</div>
-        <div class="legend-item"><div class="dot" style="background: #38bdf8;"></div> Akasha-Nav (Hamiltonian Symplectic)</div>
-        <div class="legend-item"><div class="dot" style="background: #ef4444;"></div> Naive IMU (Unbounded Quadratic Drift)</div>
+    <div class="stat-box" style="width: 280px;">
+      <div class="stat-label" style="margin-bottom: 6px;">Live Sensor Noise Injection</div>
+      
+      <div class="control-row">
+        <div class="slider-label">
+          <span>IMU Gaussian Noise (σ)</span>
+          <span id="lbl-noise">0.12 m/s²</span>
+        </div>
+        <input type="range" id="rng-noise" min="0.01" max="0.40" step="0.01" value="0.12">
+      </div>
+
+      <div class="control-row">
+        <div class="slider-label">
+          <span>Accelerometer Bias Drift (b_a)</span>
+          <span id="lbl-bias">0.035 m/s²</span>
+        </div>
+        <input type="range" id="rng-bias" min="0.00" max="0.10" step="0.005" value="0.035">
+      </div>
+
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+        <button id="btn-toggle-filter" class="btn active">Akasha Filter: ENABLED</button>
+        <button id="btn-reset-flight" class="btn">Reset Flight Origin (t = 0)</button>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Playback Controls -->
+  <!-- Bottom HUD: Camera & Flight Controls -->
   <div class="hud-bottom">
-    <button id="btn-play" class="btn active">Pause</button>
-    <button id="btn-restart" class="btn">Restart Mission</button>
-    <button id="btn-speed" class="btn">Speed: 1x</button>
-    <button id="btn-camera" class="btn">Cam: Follow Drone</button>
+    <button id="btn-play" class="btn active">Simulation: Running</button>
+    <button id="btn-speed" class="btn">Sim Speed: 1.0x</button>
+    <button id="btn-cam" class="btn">Camera: Follow Drone</button>
   </div>
 
   <script>
-    // --- 1. Load Simulated Telemetry Data ---
-    let droneData = null;
-    let currentIndex = 0;
-    let isPlaying = true;
-    let speedMultiplier = 1.0;
-    let cameraMode = 'follow'; // 'follow' or 'orbit'
+    // =========================================================================
+    // 1. PURE LIVE AKASHA HAMILTONIAN SYMPLECTIC LEAPFROG ENGINE
+    // =========================================================================
+    class LiveAkashaNavEngine {
+      constructor() {
+        this.dt = 0.05; // 20 Hz IMU integration clock
+        this.mass = 1.2; // 1.2 kg quadcopter
+        this.maxSpeed = 8.0; // 8 m/s maximum physical drone speed
+        this.maxKineticEnergy = 0.5 * this.mass * (this.maxSpeed ** 2); // 38.4 Joules
 
-    // Generate analytical fallback data if JSON fetch has CORS restriction
-    function generateFallbackData() {
-      const dt = 0.05;
-      const N = 1200;
-      const t = [], gt = [], nv = [], ak = [];
+        this.filterEnabled = true;
+        this.noiseStd = 0.12;
+        this.biasDrift = 0.035;
 
-      for (let i = 0; i < N; i++) {
-        const time = i * dt;
-        t.push(time);
-        
-        // Ground truth
-        const gx = 15.0 * Math.sin(0.2 * time);
-        const gy = 10.0 * Math.sin(0.4 * time);
-        const gz = 5.0 + 2.0 * Math.cos(0.15 * time);
-        gt.push([gx, gy, gz]);
-
-        // Naive quadratic drift
-        const driftCoeff = 0.015 * (time ** 2);
-        nv.push([gx + driftCoeff * 0.8, gy + driftCoeff * 0.5, gz + driftCoeff * 0.2]);
-
-        // Akasha bounded drift
-        const akDrift = Math.sin(0.1 * time) * 3.5 + (0.007 * (time ** 1.8));
-        ak.push([gx + akDrift * 0.6, gy + akDrift * 0.4, gz + akDrift * 0.1]);
+        this.reset();
       }
 
-      return { time: t, ground_truth: gt, naive: nv, akasha: ak };
+      reset() {
+        this.simTime = 0.0;
+
+        // Canonical coordinates: q = position in R^3, p = momentum in R^3
+        this.q_truth = [0.0, 0.0, 5.0];
+        this.v_truth = [3.0, 4.0, 0.0];
+        this.p_truth = [this.mass * 3.0, this.mass * 4.0, 0.0];
+
+        // Naive double integrator state
+        this.q_naive = [...this.q_truth];
+        this.v_naive = [...this.v_truth];
+
+        // Akasha Hamiltonian filter state
+        this.q_akasha = [...this.q_truth];
+        this.p_akasha = [...this.p_truth];
+
+        // Telemetry history for phase space visualization
+        this.phaseHistory = [];
+        this.pathGT = [];
+        this.pathNaive = [];
+        this.pathAkasha = [];
+      }
+
+      // Live step called continuously inside requestAnimationFrame
+      step() {
+        const t = this.simTime;
+        this.dt = 0.05;
+
+        // A. True Physical Flight Trajectory (Smooth 3D Tunnel Corridor)
+        const gx = 15.0 * Math.sin(0.2 * t);
+        const gy = 10.0 * Math.sin(0.4 * t);
+        const gz = 5.0 + 2.0 * Math.cos(0.15 * t);
+
+        const vx = 15.0 * 0.2 * Math.cos(0.2 * t);
+        const vy = 10.0 * 0.4 * Math.cos(0.4 * t);
+        const vz = -2.0 * 0.15 * Math.sin(0.15 * t);
+
+        const ax = -15.0 * 0.04 * Math.sin(0.2 * t);
+        const ay = -10.0 * 0.16 * Math.sin(0.4 * t);
+        const az = -2.0 * 0.0225 * Math.cos(0.15 * t);
+
+        this.q_truth = [gx, gy, gz];
+        this.v_truth = [vx, vy, vz];
+
+        // B. Inject Live Gaussian Noise + Linear Bias Drift (The killer of standard IMUs)
+        const noise = () => (Math.random() + Math.random() + Math.random() - 1.5) * 2.0 * this.noiseStd;
+        const currentBias = this.biasDrift * Math.min(t / 30.0, 2.0);
+
+        const rawAcc = [
+          ax + noise() + currentBias * 0.8,
+          ay + noise() + currentBias * 0.5,
+          az + noise() + currentBias * 0.2
+        ];
+
+        // C. Standard Naive Double Integrator (Unconstrained)
+        for (let k = 0; k < 3; k++) {
+          this.v_naive[k] += rawAcc[k] * this.dt;
+          this.q_naive[k] += this.v_naive[k] * this.dt;
+        }
+
+        // D. AKASHA-NAV 2ND-ORDER SYMPLECTIC LEAPFROG FILTER
+        if (this.filterEnabled) {
+          const F = [this.mass * rawAcc[0], this.mass * rawAcc[1], this.mass * rawAcc[2]];
+
+          // Step 1: Half-step momentum kick
+          const p_half = [
+            this.p_akasha[0] + 0.5 * this.dt * F[0],
+            this.p_akasha[1] + 0.5 * this.dt * F[1],
+            this.p_akasha[2] + 0.5 * this.dt * F[2]
+          ];
+
+          // Step 2: Hamiltonian Manifold Kinetic Energy Bound
+          let currentKE = 0.5 * (p_half[0]**2 + p_half[1]**2 + p_half[2]**2) / this.mass;
+          if (currentKE > this.maxKineticEnergy) {
+            const scale = Math.sqrt(this.maxKineticEnergy / currentKE);
+            p_half[0] *= scale;
+            p_half[1] *= scale;
+            p_half[2] *= scale;
+          }
+
+          // Step 3: Full-step position drift along canonical momentum
+          const v_half = [p_half[0] / this.mass, p_half[1] / this.mass, p_half[2] / this.mass];
+          const q_next = [
+            this.q_akasha[0] + this.dt * v_half[0],
+            this.q_akasha[1] + this.dt * v_half[1],
+            this.q_akasha[2] + this.dt * v_half[2]
+          ];
+
+          // Step 4: Virtual corridor damping & second half-step momentum kick
+          const F_damped = [
+            F[0] - 0.12 * v_half[0],
+            F[1] - 0.12 * v_half[1],
+            F[2] - 0.12 * v_half[2]
+          ];
+
+          const p_next = [
+            p_half[0] + 0.5 * this.dt * F_damped[0],
+            p_half[1] + 0.5 * this.dt * F_damped[1],
+            p_half[2] + 0.5 * this.dt * F_damped[2]
+          ];
+
+          // Final Energy Projection
+          let ke_next = 0.5 * (p_next[0]**2 + p_next[1]**2 + p_next[2]**2) / this.mass;
+          if (ke_next > this.maxKineticEnergy) {
+            const scale = Math.sqrt(this.maxKineticEnergy / ke_next);
+            p_next[0] *= scale;
+            p_next[1] *= scale;
+            p_next[2] *= scale;
+          }
+
+          this.q_akasha = q_next;
+          this.p_akasha = p_next;
+        } else {
+          // If user disabled Akasha, it behaves like naive integrator!
+          for (let k = 0; k < 3; k++) {
+            const v = this.p_akasha[k] / this.mass + rawAcc[k] * this.dt;
+            this.q_akasha[k] += v * this.dt;
+            this.p_akasha[k] = v * this.mass;
+          }
+        }
+
+        this.simTime += this.dt;
+
+        // Record live phase point
+        this.phaseHistory.push({ q: this.q_akasha[0], p: this.p_akasha[0] });
+        if (this.phaseHistory.length > 250) this.phaseHistory.shift();
+
+        // Record 3D trails (keep last 600 points)
+        this.pathGT.push([...this.q_truth]);
+        this.pathNaive.push([...this.q_naive]);
+        this.pathAkasha.push([...this.q_akasha]);
+
+        if (this.pathGT.length > 700) {
+          this.pathGT.shift();
+          this.pathNaive.shift();
+          this.pathAkasha.shift();
+        }
+      }
     }
 
-    // --- 2. Setup Three.js 3D Visualizer ---
+    const engine = new LiveAkashaNavEngine();
+
+    // =========================================================================
+    // 2. THREE.JS 3D SCENE SETUP
+    // =========================================================================
     const container = document.getElementById("canvas-container");
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x030712, 0.012);
 
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 25, 45);
+    camera.position.set(-15, 20, 35);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
     container.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -144,150 +296,205 @@
     controls.dampingFactor = 0.05;
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0x334155, 1.8);
-    scene.add(ambientLight);
-
+    scene.add(new THREE.AmbientLight(0x334155, 1.8));
     const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
     dirLight.position.set(20, 40, 20);
     scene.add(dirLight);
 
-    // Tunnel / Canyon Grid Floor
-    const grid = new THREE.GridHelper(120, 60, 0x38bdf8, 0x1e293b);
+    // Neon Floor Grid
+    const grid = new THREE.GridHelper(140, 70, 0x38bdf8, 0x1e293b);
     grid.position.y = 0;
     scene.add(grid);
 
     // Drone 3D Mesh
     const droneGroup = new THREE.Group();
-    const bodyGeo = new THREE.BoxGeometry(1.2, 0.25, 1.2);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.8, roughness: 0.2 });
-    const droneBody = new THREE.Mesh(bodyGeo, bodyMat);
+    const droneBody = new THREE.Mesh(
+      new THREE.BoxGeometry(1.4, 0.3, 1.4),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.8, roughness: 0.2 })
+    );
     droneGroup.add(droneBody);
 
-    // Quad rotors
-    const rotorGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.05, 16);
-    const rotorMat = new THREE.MeshBasicMaterial({ color: 0x4ade80, wireframe: true });
     const rotors = [];
-    const rotorOffsets = [[0.6, 0.15, 0.6], [-0.6, 0.15, 0.6], [0.6, 0.15, -0.6], [-0.6, 0.15, -0.6]];
-    rotorOffsets.forEach(pos => {
-      const r = new THREE.Mesh(rotorGeo, rotorMat);
-      r.position.set(pos[0], pos[1], pos[2]);
+    [[-0.7, 0.2, -0.7], [0.7, 0.2, -0.7], [-0.7, 0.2, 0.7], [0.7, 0.2, 0.7]].forEach(pos => {
+      const r = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.05, 16), new THREE.MeshBasicMaterial({ color: 0x4ade80, wireframe: true }));
+      r.position.set(...pos);
       droneGroup.add(r);
       rotors.push(r);
     });
-
     scene.add(droneGroup);
 
-    // Path Line Geometries
-    let lineGT, lineNaive, lineAkasha;
+    // Live Dynamic Path Lines
+    const MAX_POINTS = 800;
+    const gtGeo = new THREE.BufferGeometry();
+    const naiveGeo = new THREE.BufferGeometry();
+    const akGeo = new THREE.BufferGeometry();
 
-    function initPaths(data) {
-      // Ground Truth (Green dashed)
-      const gtPoints = data.ground_truth.map(p => new THREE.Vector3(p[0], p[2], p[1]));
-      const gtGeo = new THREE.BufferGeometry().setFromPoints(gtPoints);
-      const gtMat = new THREE.LineDashedMaterial({ color: 0x4ade80, dashSize: 1.5, gapSize: 0.8, linewidth: 2 });
-      lineGT = new THREE.Line(gtGeo, gtMat);
-      lineGT.computeLineDistances();
-      scene.add(lineGT);
+    const gtPosArr = new Float32Array(MAX_POINTS * 3);
+    const naivePosArr = new Float32Array(MAX_POINTS * 3);
+    const akPosArr = new Float32Array(MAX_POINTS * 3);
 
-      // Naive Path (Red)
-      const nvPoints = data.naive.map(p => new THREE.Vector3(p[0], p[2], p[1]));
-      const nvGeo = new THREE.BufferGeometry().setFromPoints(nvPoints);
-      const nvMat = new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2, transparent: true, opacity: 0.85 });
-      lineNaive = new THREE.Line(nvGeo, nvMat);
-      scene.add(lineNaive);
+    gtGeo.setAttribute('position', new THREE.BufferAttribute(gtPosArr, 3));
+    naiveGeo.setAttribute('position', new THREE.BufferAttribute(naivePosArr, 3));
+    akGeo.setAttribute('position', new THREE.BufferAttribute(akPosArr, 3));
 
-      // Akasha-Nav Path (Cyan glowing)
-      const akPoints = data.akasha.map(p => new THREE.Vector3(p[0], p[2], p[1]));
-      const akGeo = new THREE.BufferGeometry().setFromPoints(akPoints);
-      const akMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 3 });
-      lineAkasha = new THREE.Line(akGeo, akMat);
-      scene.add(lineAkasha);
+    const lineGT = new THREE.Line(gtGeo, new THREE.LineDashedMaterial({ color: 0x4ade80, dashSize: 1.5, gapSize: 0.8 }));
+    const lineNaive = new THREE.Line(naiveGeo, new THREE.LineBasicMaterial({ color: 0xef4444, linewidth: 2, transparent: true, opacity: 0.8 }));
+    const lineAkasha = new THREE.Line(akGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 3 }));
+
+    scene.add(lineGT);
+    scene.add(lineNaive);
+    scene.add(lineAkasha);
+
+    function updateLineBuffers(geo, posArr, path) {
+      for (let i = 0; i < path.length; i++) {
+        posArr[i * 3 + 0] = path[i][0];
+        posArr[i * 3 + 1] = path[i][2]; // Three.js Y is height
+        posArr[i * 3 + 2] = path[i][1];
+      }
+      geo.attributes.position.needsUpdate = true;
+      geo.setDrawRange(0, path.length);
     }
 
-    // Attempt to fetch drone_data.json, otherwise use fallback
-    fetch("drone_data.json")
-      .then(res => res.json())
-      .then(data => {
-        droneData = data;
-        initPaths(droneData);
-      })
-      .catch(() => {
-        droneData = generateFallbackData();
-        initPaths(droneData);
-      });
+    // =========================================================================
+    // 3. 2D PHASE PORTRAIT CANVAS IN HUD
+    // =========================================================================
+    const phaseCvs = document.getElementById("phase-canvas");
+    const pctx = phaseCvs.getContext("2d");
 
-    // --- 3. UI Controls ---
+    function renderPhasePortrait() {
+      pctx.fillStyle = "#0b0f19";
+      pctx.fillRect(0, 0, phaseCvs.width, phaseCvs.height);
+
+      // Axes
+      pctx.strokeStyle = "#1f2937";
+      pctx.lineWidth = 1;
+      pctx.beginPath();
+      pctx.moveTo(0, phaseCvs.height / 2); pctx.lineTo(phaseCvs.width, phaseCvs.height / 2);
+      pctx.moveTo(phaseCvs.width / 2, 0); pctx.lineTo(phaseCvs.width / 2, phaseCvs.height);
+      pctx.stroke();
+
+      // Draw Orbit Trace
+      if (engine.phaseHistory.length > 2) {
+        pctx.strokeStyle = "#38bdf8";
+        pctx.lineWidth = 1.5;
+        pctx.beginPath();
+        for (let i = 0; i < engine.phaseHistory.length; i++) {
+          const pt = engine.phaseHistory[i];
+          const cx = phaseCvs.width / 2 + pt.q * 8.5;
+          const cy = phaseCvs.height / 2 - pt.p * 4.5;
+          if (i === 0) pctx.moveTo(cx, cy);
+          else pctx.lineTo(cx, cy);
+        }
+        pctx.stroke();
+
+        // Current point head
+        const last = engine.phaseHistory[engine.phaseHistory.length - 1];
+        const hx = phaseCvs.width / 2 + last.q * 8.5;
+        const hy = phaseCvs.height / 2 - last.p * 4.5;
+        pctx.fillStyle = "#4ade80";
+        pctx.beginPath();
+        pctx.arc(hx, hy, 3.5, 0, Math.PI * 2);
+        pctx.fill();
+      }
+    }
+
+    // =========================================================================
+    // 4. INTERACTIVE EVENT HANDLERS
+    // =========================================================================
+    let isSimRunning = true;
+    let simSpeed = 1.0;
+    let cameraMode = 'follow';
+
     document.getElementById("btn-play").addEventListener("click", (e) => {
-      isPlaying = !isPlaying;
-      e.target.textContent = isPlaying ? "Pause" : "Resume";
-      e.target.classList.toggle("active", isPlaying);
-    });
-
-    document.getElementById("btn-restart").addEventListener("click", () => {
-      currentIndex = 0;
+      isSimRunning = !isSimRunning;
+      e.target.textContent = isSimRunning ? "Simulation: Running" : "Simulation: Paused";
+      e.target.classList.toggle("active", isSimRunning);
     });
 
     document.getElementById("btn-speed").addEventListener("click", (e) => {
-      if (speedMultiplier === 1.0) speedMultiplier = 2.0;
-      else if (speedMultiplier === 2.0) speedMultiplier = 5.0;
-      else speedMultiplier = 1.0;
-      e.target.textContent = `Speed: ${speedMultiplier}x`;
+      simSpeed = simSpeed === 1.0 ? 2.0 : (simSpeed === 2.0 ? 4.0 : 1.0);
+      e.target.textContent = `Sim Speed: ${simSpeed.toFixed(1)}x`;
     });
 
-    document.getElementById("btn-camera").addEventListener("click", (e) => {
+    document.getElementById("btn-cam").addEventListener("click", (e) => {
       cameraMode = cameraMode === 'follow' ? 'orbit' : 'follow';
-      e.target.textContent = cameraMode === 'follow' ? "Cam: Follow Drone" : "Cam: Free Orbit";
+      e.target.textContent = cameraMode === 'follow' ? "Camera: Follow Drone" : "Camera: Free Orbit";
     });
 
-    // --- 4. Main Animation Loop ---
-    const clock = new THREE.Clock();
+    document.getElementById("btn-reset-flight").addEventListener("click", () => {
+      engine.reset();
+    });
 
+    const btnToggle = document.getElementById("btn-toggle-filter");
+    btnToggle.addEventListener("click", () => {
+      engine.filterEnabled = !engine.filterEnabled;
+      btnToggle.textContent = engine.filterEnabled ? "Akasha Filter: ENABLED" : "Akasha Filter: DISABLED";
+      btnToggle.classList.toggle("active", engine.filterEnabled);
+      btnToggle.classList.toggle("danger", !engine.filterEnabled);
+      document.getElementById("hud-status").textContent = engine.filterEnabled ? "TRACKING" : "UNCONSTRAINED";
+      document.getElementById("hud-status").style.color = engine.filterEnabled ? "#4ade80" : "#ef4444";
+    });
+
+    document.getElementById("rng-noise").addEventListener("input", (e) => {
+      engine.noiseStd = parseFloat(e.target.value);
+      document.getElementById("lbl-noise").textContent = `${engine.noiseStd.toFixed(2)} m/s²`;
+    });
+
+    document.getElementById("rng-bias").addEventListener("input", (e) => {
+      engine.biasDrift = parseFloat(e.target.value);
+      document.getElementById("lbl-bias").textContent = `${engine.biasDrift.toFixed(3)} m/s²`;
+    });
+
+    // =========================================================================
+    // 5. MAIN 60 FPS SIMULATION & RENDER LOOP
+    // =========================================================================
     function animate() {
       requestAnimationFrame(animate);
-      const delta = clock.getDelta();
       controls.update();
 
       // Spin rotors
-      rotors.forEach(r => r.rotation.y += 0.4);
+      rotors.forEach(r => r.rotation.y += 0.5);
 
-      if (droneData && isPlaying) {
-        currentIndex = Math.min(currentIndex + Math.round(speedMultiplier), droneData.time.length - 1);
-        
-        const t = droneData.time[currentIndex];
-        const gtPos = droneData.ground_truth[currentIndex];
-        const nvPos = droneData.naive[currentIndex];
-        const akPos = droneData.akasha[currentIndex];
-
-        // Move Drone to Akasha Estimated Position (or Ground Truth)
-        droneGroup.position.set(akPos[0], akPos[2], akPos[1]);
-
-        // Tilt drone slightly based on trajectory curvature
-        if (currentIndex < droneData.time.length - 1) {
-          const nextP = droneData.akasha[currentIndex + 1];
-          const dir = new THREE.Vector3(nextP[0] - akPos[0], nextP[2] - akPos[2], nextP[1] - akPos[1]).normalize();
-          droneGroup.lookAt(droneGroup.position.clone().add(dir));
+      if (isSimRunning) {
+        // Step live engine proportional to sim speed
+        const stepsToRun = Math.round(simSpeed);
+        for (let s = 0; s < stepsToRun; s++) {
+          engine.step();
         }
 
-        // Camera follow
+        // Move Drone mesh to current Akasha position
+        const akPos = engine.q_akasha;
+        droneGroup.position.set(akPos[0], akPos[2], akPos[1]);
+
+        // Tilt drone towards velocity vector
+        const vel = [engine.p_akasha[0] / engine.mass, engine.p_akasha[2] / engine.mass, engine.p_akasha[1] / engine.mass];
+        const dir = new THREE.Vector3(...vel).normalize();
+        droneGroup.lookAt(droneGroup.position.clone().add(dir));
+
+        // Camera follow mode
         if (cameraMode === 'follow') {
-          camera.position.lerp(new THREE.Vector3(akPos[0] - 12, akPos[2] + 8, akPos[1] + 12), 0.05);
+          camera.position.lerp(new THREE.Vector3(akPos[0] - 14, akPos[2] + 9, akPos[1] + 14), 0.06);
           controls.target.copy(droneGroup.position);
         }
 
-        // Compute instantaneous drift error
-        const errNaive = Math.hypot(nvPos[0] - gtPos[0], nvPos[1] - gtPos[1], nvPos[2] - gtPos[2]);
-        const errAkasha = Math.hypot(akPos[0] - gtPos[0], akPos[1] - gtPos[1], akPos[2] - gtPos[2]);
+        // Update 3D Path lines live
+        updateLineBuffers(gtGeo, gtPosArr, engine.pathGT);
+        updateLineBuffers(naiveGeo, naivePosArr, engine.pathNaive);
+        updateLineBuffers(akGeo, akPosArr, engine.pathAkasha);
+
+        // Compute Live Drift Errors
+        const naiveErr = Math.hypot(engine.q_naive[0] - engine.q_truth[0], engine.q_naive[1] - engine.q_truth[1], engine.q_naive[2] - engine.q_truth[2]);
+        const akashaErr = Math.hypot(engine.q_akasha[0] - engine.q_truth[0], engine.q_akasha[1] - engine.q_truth[1], engine.q_akasha[2] - engine.q_truth[2]);
+
+        const currentEnergy = 0.5 * (engine.p_akasha[0]**2 + engine.p_akasha[1]**2 + engine.p_akasha[2]**2) / engine.mass;
 
         // Update HUD
-        document.getElementById("hud-time").textContent = `${t.toFixed(1)} s`;
-        document.getElementById("hud-naive-err").textContent = `${errNaive.toFixed(2)} m`;
-        document.getElementById("hud-akasha-err").textContent = `${errAkasha.toFixed(2)} m`;
+        document.getElementById("hud-time").textContent = `${engine.simTime.toFixed(2)} s`;
+        document.getElementById("hud-naive-err").textContent = `${naiveErr.toFixed(2)} m`;
+        document.getElementById("hud-akasha-err").textContent = `${akashaErr.toFixed(2)} m`;
+        document.getElementById("hud-energy").textContent = `H: ${currentEnergy.toFixed(1)} J`;
 
-        if (currentIndex >= droneData.time.length - 1) {
-          isPlaying = false;
-          document.getElementById("btn-play").textContent = "Completed (Restart)";
-          document.getElementById("btn-play").classList.remove("active");
-        }
+        renderPhasePortrait();
       }
 
       renderer.render(scene, camera);
