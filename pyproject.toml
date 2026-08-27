@@ -1,0 +1,22 @@
+[project]
+name = "akasha-2-lite"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Yani Meziani", email = "mezianiyani0@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "matplotlib>=3.11.1",
+    "numpy>=2.5.2",
+    "scipy>=1.18.1",
+    "torch>=2.13.0",
+]
+
+[project.scripts]
+akasha-2-lite = "akasha_2_lite:main"
+
+[build-system]
+requires = ["uv_build>=0.12.4,<0.13.0"]
+build-backend = "uv_build"
