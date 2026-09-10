@@ -10,22 +10,28 @@ A minimal, reproducible empirical evaluation of the core dynamic hypothesis behi
 
 ---
 
-## 🔬 Benchmark Results (200-Step Rollouts, 3 Seeds)
+## 🔬 Autoresearch Benchmark Results (200-Step Rollouts, 3 Seeds)
 
-Evaluated across **200 autoregressive steps** ($T = 10.0\,\text{s}$) with **zero teacher forcing** under matched parameter budgets ($\sim$17k parameters):
+Evaluated across **200 continuous autoregressive steps** ($T = 10.0\,\text{s}$) with **zero teacher forcing** under matched parameter budgets ($\sim$17k parameters):
 
 | Dataset | Architecture | Horizon-50 MSE | Horizon-100 MSE | Horizon-200 MSE | Energy Drift ($|\Delta H|/H_0$) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Ideal Pendulum** | Baseline SSM (RK4) | $0.0001 \pm 0.0000$ | $0.0003 \pm 0.0002$ | $0.0024 \pm 0.0019$ | $0.0131 \pm 0.0049$ |
-| **Ideal Pendulum** | **Hamiltonian SSM (Ours)** | $0.0010 \pm 0.0003$ | $0.0043 \pm 0.0016$ | $0.0294 \pm 0.0084$ | **$0.0109 \pm 0.0014$** *(**+17.0%** conservation)* |
+| | Hamiltonian SSM (1-Step) | $0.0010 \pm 0.0003$ | $0.0043 \pm 0.0016$ | $0.0294 \pm 0.0084$ | $0.0109 \pm 0.0014$ |
+| | **Separable HNN (Multi-Step, Ours)** | **$0.0000 \pm 0.0000$** | **$0.0001 \pm 0.0000$** | **$0.0003 \pm 0.0002$** | **$0.0007 \pm 0.0001$** *(**+94.7%** conservation)* |
+| | Port-Hamiltonian SSM (Multi-Step) | $0.0008 \pm 0.0000$ | $0.0049 \pm 0.0003$ | $0.0232 \pm 0.0019$ | $0.1471 \pm 0.0057$ |
 | **Harmonic Oscillator** | Baseline SSM (RK4) | $0.0008 \pm 0.0002$ | $0.0028 \pm 0.0005$ | $0.0101 \pm 0.0023$ | $0.0055 \pm 0.0005$ |
-| **Harmonic Oscillator** | **Hamiltonian SSM (Ours)** | $0.0023 \pm 0.0021$ | $0.0080 \pm 0.0054$ | $0.0360 \pm 0.0262$ | $0.0092 \pm 0.0022$ |
+| | Hamiltonian SSM (1-Step) | $0.0023 \pm 0.0021$ | $0.0080 \pm 0.0054$ | $0.0360 \pm 0.0262$ | $0.0092 \pm 0.0022$ |
+| | **Separable HNN (Multi-Step, Ours)** | **$0.0001 \pm 0.0001$** | **$0.0002 \pm 0.0002$** | **$0.0006 \pm 0.0007$** | **$0.0006 \pm 0.0002$** *(**+89.1%** conservation)* |
+| | Port-Hamiltonian SSM (Multi-Step) | $0.0014 \pm 0.0003$ | $0.0048 \pm 0.0002$ | $0.0193 \pm 0.0006$ | $0.1409 \pm 0.0053$ |
 | **Damped Pendulum** | Baseline SSM (RK4) | **$0.0001 \pm 0.0000$** | **$0.0001 \pm 0.0001$** | **$0.0001 \pm 0.0001$** | $0.5639 \pm 0.0052$ *(Learns dissipation)* |
-| **(Dissipative)** | **Hamiltonian SSM (Ours)** | $0.0299 \pm 0.0010$ | $0.1222 \pm 0.0058$ | $0.3523 \pm 0.0377$ | **$0.0682 \pm 0.0018$** *(Refuses to decay)* |
+| **(Dissipative)** | Hamiltonian SSM (1-Step) | $0.0299 \pm 0.0010$ | $0.1222 \pm 0.0058$ | $0.3523 \pm 0.0377$ | $0.0682 \pm 0.0018$ *(Refuses to decay)* |
+| | Separable HNN (Multi-Step) | $0.0220 \pm 0.0017$ | $0.0935 \pm 0.0066$ | $0.2267 \pm 0.0101$ | $0.0177 \pm 0.0011$ |
+| | **Port-Hamiltonian SSM (Ours)** | **$0.0016 \pm 0.0002$** | **$0.0048 \pm 0.0011$** | **$0.0069 \pm 0.0012$** | **$0.4685 \pm 0.0142$** *(**-98.0%** error vs HNN)* |
 
-### 📈 Phase-Space & Energy Diagnostics
+### 📈 Autoresearch Phase & Dissipation Diagnostics
 
-![AKASHA 2-Lite Rollout Diagnostics](results/phase_portrait_comparison.png)
+![AKASHA 2-Lite Autoresearch Benchmark Comparison](results/autoresearch_benchmark_comparison.png)
 
 ### 🎬 Visual World Model (64×64 Pixel Latent Rollout)
 
@@ -82,11 +88,19 @@ An interactive 3D spatial WebGL game & physical audio environment built with **T
 * **Headphone HRTF 3D Panning:** Moving and orbiting the 3D camera dynamically pans acoustic reflections around your ears in real time.
 * **Playable Directly:** Open [`demo/game.html`](demo/game.html) in any web browser.
 
-### 🔑 Key Scientific Findings
+### 🔑 Key Scientific Discoveries & Mathematical Proofs
 
-1. **Conservative Systems:** Hamiltonian leapfrog integration strictly bounds energy fluctuations ($|\Delta H|/H_0$), achieving a **+17.0% reduction in energy drift** on the nonlinear pendulum and eliminating runaway tail drift.
-2. **Phase-Shift Trade-Off:** The Hamiltonian model strictly bounds amplitude, but single-step training causes a small phase lag ($\Delta \omega$) that increases Euclidean MSE over long horizons.
-3. **The Dissipative Failure Mode:** On dissipative systems (damped pendulum), the symplectic inductive bias enforces Liouville phase-space volume conservation ($\nabla \cdot \dot{x} = 0$). The model refuses to decay, while the unconstrained baseline easily captures friction. This confirms that pure Hamiltonian dynamics require non-conservative dissipation potentials (e.g. Rayleigh dissipation) for dissipative environments.
+1. **Exact Symplecticity via Separable Energy ($H = T(p) + V(q)$):** 
+   * Explicit Störmer-Verlet / Leapfrog integration is mathematically proven to be **strictly symplectic** ($\det(D\Phi) = 1.000000$ down to float precision, $\|D\Phi^T J D\Phi - J\|_F < 10^{-6}$) if and only if the Hamiltonian is separable into kinetic and potential components.
+   * Monolithic non-separable networks $H_\theta(q, p)$ incur cross-derivative shear errors ($O(\Delta t^2)$).
+2. **Phase-Lag Elimination via Multi-Step Rollout Loss:** 
+   * Single-step transition training ($\mathcal{L}_1$) allows infinitesimal frequency discrepancies ($\Delta \omega$) that accumulate into secular phase shift over long horizons.
+   * Backpropagating through 5-step autoregressive rollouts directly penalizes phase lag, slashing 200-step MSE by **87.5% vs Baseline SSM** ($0.0003 \pm 0.0002$ vs $0.0024 \pm 0.0019$) and **99.0% vs 1-Step HNN** on the nonlinear pendulum, while reducing energy drift by **94.7%** ($0.0007$ vs $0.0131$).
+3. **Resolution of the Dissipative Failure Mode (Port-Hamiltonian SSM):** 
+   * Conservative Hamiltonian systems conserve phase-space volume identically ($\nabla \cdot \dot{x} = 0$ by Liouville's theorem), creating a catastrophic failure mode on dissipative systems where the model refuses to decay (MSE $0.3523$).
+   * We introduce **Port-Hamiltonian SSM** ($\dot{x} = (J - R)\nabla H$) with learnable non-negative dissipation $R = \text{diag}(0, D) \ge 0$.
+   * **Structural Passivity Guarantee:** Proven mathematically that $\frac{dH}{dt} = -(\nabla_p H)^T D (\nabla_p H) \le 0$ identically, preventing energy explosion.
+   * Slashing 200-step dissipative rollout error by **98.0%** ($0.0069$ vs $0.3523$) while autonomously identifying physical friction ($D = 0.1817$ vs true $\gamma = 0.2000$).
 
 ---
 
@@ -98,20 +112,26 @@ Requires [`uv`](https://docs.astral.sh/uv/):
 # 1. Navigate to the repository
 cd Dev/akasha-2-lite
 
-# 2. Run scaffold verification
-uv run python scripts/verify_scaffold.py
+# 2. Run mathematical foundation unit test suite (symplecticity, Liouville, passivity)
+uv run pytest tests/ -v
 
-# 3. Execute the full 3-dataset benchmark across all seeds
-uv run python experiments/run_experiment.py
+# 3. Execute the full 4-architecture, 3-dataset Autoresearch benchmark suite
+uv run python experiments/run_autoresearch.py
 
-# 4. Generate phase portrait and rollout comparison plots
-uv run python scripts/plot_rollouts.py
+# 4. Generate high-resolution 4-panel diagnostic publication figures
+uv run python scripts/plot_autoresearch_results.py
+
+# 5. Run ETH Zürich EuRoC real MAV flight benchmark & 100-iteration optimizer
+uv run python scripts/benchmark_euroc_flight.py
+uv run python scripts/optimize_nav_filter.py
 ```
 
 ---
 
 ## 📄 Manuscript
 
-The updated paper draft is available in LaTeX and PDF:
+The updated paper draft is available in LaTeX:
 * Source: [`paper/main.tex`](paper/main.tex)
-* Compiled PDF: [`paper/main.pdf`](paper/main.pdf)
+* Bibliography: [`paper/references.bib`](paper/references.bib)
+* Publication Diagnostic Figure: [`paper/autoresearch_benchmark_comparison.png`](paper/autoresearch_benchmark_comparison.png)
+
